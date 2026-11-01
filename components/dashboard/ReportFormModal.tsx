@@ -25,36 +25,59 @@ interface ReportFormModalProps {
   onSubmit: (input: CreateReportInput) => Promise<void>;
 }
 
-const DISTRICT_LIST = [
+// Kawasan langganan banjir & koridor arteri utama Kab. Bandung
+export const PRIMARY_HOTSPOT_ZONES = [
   'Dayeuhkolot',
-  'Baleendah',
-  'Bojongsoang',
-  'Rancaekek',
-  'Majalaya',
-  'Katapang',
-  'Cangkuang',
-  'Banjaran',
-  'Cileunyi',
-  'Cicalengka',
-  'Margahayu',
-  'Margaasih',
-  'Kutawaringin',
-  'Soreang',
-  'Pasirjambu',
-  'Ciwidey',
-  'Rancabali',
-  'Pangalengan',
+  'Baleendah (Andir / Cieunteung)',
+  'Bojongsoang (Cikapundung / Telkom)',
+  'Kopo Sayati (Margahayu)',
+  'Cibaduyut (Batas Dayeuhkolot)',
+  'Rancaekek (Kahatex / Cikeruh)',
+  'Majalaya (Citarum Hulu)',
+  'Katapang (Gandasoli)',
+  'Banjaran (Kamasan / Cisangkuy)',
+  'Margaasih (Nanjung / Lagadar)',
+];
+
+// Seluruh 31 Kecamatan resmi administratif Kabupaten Bandung (A-Z lengkap)
+export const KAB_BANDUNG_31_KECAMATAN = [
   'Arjasari',
-  'Cimaung',
-  'Ibun',
-  'Pacet',
-  'Kertasari',
+  'Baleendah',
+  'Banjaran',
+  'Bojongsoang',
+  'Cangkuang',
+  'Cicalengka',
   'Cikancung',
-  'Nagreg',
-  'Paseh',
-  'Solokanjeruk',
+  'Cilengkrang',
+  'Cileunyi',
+  'Cimaung',
+  'Cimenyan',
   'Ciparay',
+  'Ciwidey',
+  'Dayeuhkolot',
+  'Ibun',
+  'Katapang',
+  'Kertasari',
   'Kopo',
+  'Kutawaringin',
+  'Majalaya',
+  'Margaasih',
+  'Margahayu',
+  'Nagreg',
+  'Pacet',
+  'Pameungpeuk',
+  'Pangalengan',
+  'Paseh',
+  'Pasirjambu',
+  'Rancabali',
+  'Rancaekek',
+  'Solokanjeruk',
+  'Soreang',
+];
+
+export const DISTRICT_LIST = [
+  ...PRIMARY_HOTSPOT_ZONES,
+  ...KAB_BANDUNG_31_KECAMATAN,
 ];
 
 export function ReportFormModal({
@@ -287,11 +310,20 @@ export function ReportFormModal({
                       onChange={(e) => setDistrict(e.target.value)}
                       className='w-full h-11 bg-white border border-[#dce2e2] rounded px-3 text-xs sm:text-sm text-[#172d3b] font-medium focus:outline-none focus:border-[#126b70] cursor-pointer'
                     >
-                      {DISTRICT_LIST.map((d) => (
-                        <option key={d} value={d}>
-                          {d}
-                        </option>
-                      ))}
+                      <optgroup label='📍 Titik Langganan Banjir & Koridor Arteri'>
+                        {PRIMARY_HOTSPOT_ZONES.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label='🏛 Seluruh 31 Kecamatan Kab. Bandung'>
+                        {KAB_BANDUNG_31_KECAMATAN.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
 

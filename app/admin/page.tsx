@@ -24,9 +24,12 @@ import {
   CheckCircle2,
   AlertCircle,
   Lock,
+  FileText,
+  Sparkles,
 } from 'lucide-react';
 import { FloodReport, AWLRStation } from '@/types';
 import { FALLBACK_AWLR_STATIONS } from '@/lib/scraper';
+import { SituationalBulletinData } from '@/lib/bulletin-store';
 
 interface ConfigState {
   geminiConfigured: boolean;
@@ -63,17 +66,25 @@ export default function AdminDashboardPage() {
   // Action status tracker
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
 
-  // Reference time stored in state to ensure pure, idempotent renders (React 19 / Compiler compliant)
+  // Reference time stored in state safely (Next.js prerender & React 19 compiler safe)
   const [nowTimestamp, setNowTimestamp] = useState<number>(0);
   const [todayDateKey, setTodayDateKey] = useState<string>('');
 
   useEffect(() => {
-    const now = new Date();
-    setNowTimestamp(now.getTime());
-    setTodayDateKey(
-      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-    );
+    const timer = setTimeout(() => {
+      const now = new Date();
+      setNowTimestamp(now.getTime());
+      setTodayDateKey(
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+      );
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
+
+  // Bulletin state
+  const [bulletin, setBulletin] = useState<SituationalBulletinData | null>(null);
+  const [isGeneratingBulletin, setIsGeneratingBulletin] = useState(false);
+  const [bulletinMessage, setBulletinMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Check auth
   const verifyAuth = useCallback(async () => {
@@ -110,6 +121,19 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
+  // Load bulletin
+  const fetchBulletin = useCallback(async () => {
+    try {
+      const res = await fetch('/api/bulletin');
+      const data = await res.json();
+      if (data.success && data.data) {
+        setBulletin(data.data);
+      }
+    } catch {
+      // Keep existing
+    }
+  }, []);
+
   // Load reports
   const fetchReports = useCallback(async () => {
     setIsLoadingReports(true);
@@ -118,6 +142,11 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setReports(data.data);
+        const now = new Date();
+        setNowTimestamp(now.getTime());
+        setTodayDateKey(
+          `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+        );
       }
     } catch (err) {
       console.error('Failed to load reports for admin:', err);
@@ -145,10 +174,40 @@ export default function AdminDashboardPage() {
         void fetchStations();
         void fetchReports();
         void fetchConfig();
+        void fetchBulletin();
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [isAuthChecking, fetchStations, fetchReports, fetchConfig]);
+  }, [isAuthChecking, fetchStations, fetchReports, fetchConfig, fetchBulletin]);
+
+  // Handle Generate Bulletin
+  const handleGenerateBulletin = async () => {
+    setIsGeneratingBulletin(true);
+    setBulletinMessage(null);
+    try {
+      const res = await fetch('/api/bulletin/generate', { method: 'POST' });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setBulletin(data.data);
+        setBulletinMessage({
+          type: 'success',
+          text: 'Buletin situasi se-Kabupaten Bandung berhasil dibuat & dipublikasikan ke halaman warga.',
+        });
+      } else {
+        setBulletinMessage({
+          type: 'error',
+          text: data.message || 'Gagal membuat buletin.',
+        });
+      }
+    } catch {
+      setBulletinMessage({
+        type: 'error',
+        text: 'Terjadi kesalahan jaringan saat memproses buletin dengan AI.',
+      });
+    } finally {
+      setIsGeneratingBulletin(false);
+    }
+  };
 
   // Handle Logout
   const handleLogout = async () => {
@@ -626,6 +685,117 @@ export default function AdminDashboardPage() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Buletin Management Section (Pengelolaan Buletin Situasi Wilayah) */}
+            <div className="bg-white border border-[#dce2e2] rounded-md shadow-xs p-5 sm:p-6 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#dce2e2]">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-[#126b70]" />
+                    <h2 className="text-base sm:text-lg font-bold text-[#172d3b]">
+                      Pengelolaan Buletin Situasi Wilayah (AI Kebencanaan)
+                    </h2>
+                  </div>
+                  <p className="text-xs text-[#66757c]">
+                    Generate ringkasan situasi bencana &amp; jalur transportasi se-Kabupaten Bandung dengan AI untuk dipublikasikan di halaman warga.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded bg-[#eaf3f1] text-[#497665] border border-[#c3e6cb] uppercase tracking-wider">
+                    Aktif di Halaman Publik
+                  </span>
+                </div>
+              </div>
+
+              {bulletinMessage && (
+                <div
+                  className={`p-3.5 rounded text-xs flex items-start gap-2 ${
+                    bulletinMessage.type === 'success'
+                      ? 'bg-[#eaf3f1] border border-[#c3e6cb] text-[#497665]'
+                      : 'bg-[#fbeeeb] border border-[#f5c6cb] text-[#b33e35]'
+                  }`}
+                >
+                  {bulletinMessage.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  )}
+                  <span>{bulletinMessage.text}</span>
+                </div>
+              )}
+
+              {/* Current Bulletin Summary Box */}
+              <div className="bg-[#f8faf9] border border-[#dce2e2] rounded p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <span className="font-bold text-[#172d3b] text-sm">
+                    {bulletin?.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
+                  </span>
+                  <span className="text-[#66757c] font-medium">
+                    {bulletin?.lastUpdated || 'Belum diperbarui'}
+                  </span>
+                </div>
+
+                <p className="text-xs text-[#172d3b] leading-relaxed">
+                  {bulletin?.leadSummary ||
+                    'Belum ada buletin yang di-generate. Klik tombol di bawah untuk membuat analisis situasi menggunakan Gemini AI.'}
+                </p>
+
+                {/* Regions Grid */}
+                {bulletin?.regions && bulletin.regions.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+                    {bulletin.regions.map((reg, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white border border-[#dce2e2] rounded p-3 text-xs space-y-1"
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-bold text-[#172d3b] truncate">{reg.region}</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#fcf2e4] text-[#a9621d] shrink-0">
+                            {reg.status}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-[#66757c]">{reg.location}</div>
+                        <div className="text-[11px] text-[#172d3b] line-clamp-2 leading-relaxed">
+                          {reg.condition}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={handleGenerateBulletin}
+                  disabled={isGeneratingBulletin}
+                  className="h-10 px-4 bg-[#126b70] hover:bg-[#0e5458] text-white text-xs font-semibold rounded shadow-xs flex items-center gap-2 transition cursor-pointer disabled:opacity-60"
+                >
+                  {isGeneratingBulletin ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sedang Menganalisis Wilayah...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Generate / Perbarui Buletin dengan AI</span>
+                    </>
+                  )}
+                </button>
+
+                <Link
+                  href="/?tab=buletin"
+                  target="_blank"
+                  className="h-10 px-4 bg-white hover:bg-[#f5f6f5] border border-[#dce2e2] text-xs font-semibold text-[#172d3b] rounded shadow-2xs flex items-center gap-1.5 transition"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-[#172d3b]" />
+                  <span>Lihat di Halaman Buletin Publik</span>
+                </Link>
               </div>
             </div>
 

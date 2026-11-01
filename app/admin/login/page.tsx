@@ -8,7 +8,6 @@ import {
   User,
   Lock,
   ArrowLeft,
-  LogIn,
   Loader2,
   AlertCircle,
   Eye,
@@ -33,7 +32,7 @@ export default function AdminLoginPage() {
           router.replace('/admin');
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {

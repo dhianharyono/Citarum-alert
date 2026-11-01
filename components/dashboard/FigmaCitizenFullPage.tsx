@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   Database,
   ThumbsUp,
-  ThumbsDown,
   Video,
   ExternalLink,
   Sparkles,
