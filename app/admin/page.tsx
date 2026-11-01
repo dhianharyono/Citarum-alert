@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 import { FloodReport, AWLRStation } from '@/types';
 import { FALLBACK_AWLR_STATIONS } from '@/lib/scraper';
-import { SituationalBulletinData } from '@/lib/bulletin-store';
+import { SituationalBulletinData } from '@/lib/bulletin-types';
 
 interface ConfigState {
   geminiConfigured: boolean;

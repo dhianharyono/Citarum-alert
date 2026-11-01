@@ -14,7 +14,7 @@ import { FigmaCitizenFullPage } from '@/components/dashboard/FigmaCitizenFullPag
 import { FigmaFooter } from '@/components/dashboard/FigmaFooter';
 import { ReportFormModal } from '@/components/dashboard/ReportFormModal';
 import { Alert } from '@/components/ui/Alert';
-import { SituationalBulletinData } from '@/lib/bulletin-store';
+import { SituationalBulletinData } from '@/lib/bulletin-types';
 
 // Dynamic import with SSR disabled for Leaflet container
 const FloodMap = dynamic(() => import('@/components/map/FloodMap'), {

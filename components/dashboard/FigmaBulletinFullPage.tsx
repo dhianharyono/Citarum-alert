@@ -10,7 +10,7 @@ import {
   Car,
   Mountain,
 } from 'lucide-react';
-import { SituationalBulletinData, DEFAULT_BULLETIN } from '@/lib/bulletin-store';
+import { SituationalBulletinData, DEFAULT_BULLETIN } from '@/lib/bulletin-types';
 
 interface FigmaBulletinFullPageProps {
   bulletin?: SituationalBulletinData | null;
@@ -72,20 +72,18 @@ export function FigmaBulletinFullPage({
   bulletin,
   lastUpdated,
 }: FigmaBulletinFullPageProps) {
-  const [data, setData] = useState<SituationalBulletinData>(bulletin || DEFAULT_BULLETIN);
+  const [fetchedData, setFetchedData] = useState<SituationalBulletinData | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
 
   useEffect(() => {
-    if (bulletin) {
-      setData(bulletin);
-      return;
-    }
+    if (bulletin) return;
+
     let isCancelled = false;
     fetch('/api/bulletin')
       .then((r) => r.json())
       .then((res) => {
         if (!isCancelled && res.success && res.data) {
-          setData(res.data);
+          setFetchedData(res.data);
         }
       })
       .catch(() => {});
@@ -95,8 +93,12 @@ export function FigmaBulletinFullPage({
     };
   }, [bulletin]);
 
-  const displayTime = data.lastUpdated || lastUpdated || '1 November 2026, 21:45 WIB';
-  const regionsList = Array.isArray(data.regions) && data.regions.length > 0 ? data.regions : DEFAULT_BULLETIN.regions;
+  const activeData = bulletin || fetchedData || DEFAULT_BULLETIN;
+  const displayTime = activeData.lastUpdated || lastUpdated || '1 November 2026, 21:45 WIB';
+  const regionsList =
+    Array.isArray(activeData.regions) && activeData.regions.length > 0
+      ? activeData.regions
+      : DEFAULT_BULLETIN.regions;
 
   const filteredRegions =
     selectedFilter === 'all'
@@ -115,14 +117,14 @@ export function FigmaBulletinFullPage({
             Buletin wilayah
           </h1>
           <p className="text-sm text-[#66757c] mt-1">
-            {data.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
+            {activeData.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
           </p>
         </div>
 
         <div className="flex flex-col md:items-end text-left md:text-right">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#172d3b]">
             <CalendarDays className="w-4 h-4 text-[#126b70]" />
-            <span>{data.period || 'November 2026'}</span>
+            <span>{activeData.period || 'November 2026'}</span>
           </div>
           <span className="text-xs text-[#66757c] mt-0.5">
             Pembaruan: {displayTime}
@@ -138,7 +140,7 @@ export function FigmaBulletinFullPage({
             Ringkasan Situasi Wilayah Terkini
           </div>
           <div className="text-xs text-[#173744] leading-relaxed">
-            {data.leadSummary ||
+            {activeData.leadSummary ||
               'Ringkasan resmi situasi kebencanaan dan transportasi se-Kabupaten Bandung dari website Citarum Alert.'}
           </div>
         </div>
@@ -231,8 +233,8 @@ export function FigmaBulletinFullPage({
 
                   {/* Col 3: Imbauan / Akses Jalan */}
                   <div className="col-span-3 text-xs sm:text-sm text-[#172d3b] leading-relaxed font-medium">
-                    {data.mitigationNotice ? (
-                      <span className="text-[#172d3b]">{data.mitigationNotice}</span>
+                    {activeData.mitigationNotice ? (
+                      <span className="text-[#172d3b]">{activeData.mitigationNotice}</span>
                     ) : (
                       'Pilih rute sesuai jenis kendaraan dan kondisi setempat. Jangan memaksakan melintas genangan.'
                     )}
@@ -279,7 +281,7 @@ export function FigmaBulletinFullPage({
                       IMBAUAN / AKSES
                     </span>
                     <p className="text-xs text-[#172d3b] leading-relaxed font-medium">
-                      {data.mitigationNotice || 'Periksa kondisi setempat sebelum melintas.'}
+                      {activeData.mitigationNotice || 'Periksa kondisi setempat sebelum melintas.'}
                     </p>
                   </div>
                 </div>
@@ -295,10 +297,10 @@ export function FigmaBulletinFullPage({
           Rujukan &amp; konteks
         </h3>
         <p className="text-xs text-[#66757c] leading-relaxed">
-          Sebagaimana tercantum di portal resmi: {data.sources || 'Pusdalops BPBD Kabupaten Bandung, BMKG Stasiun Geofisika Bandung, dan TMC Polresta Bandung.'}
+          Sebagaimana tercantum di portal resmi: {activeData.sources || 'Pusdalops BPBD Kabupaten Bandung, BMKG Stasiun Geofisika Bandung, dan TMC Polresta Bandung.'}
         </p>
         <p className="text-xs text-[#66757c] leading-relaxed">
-          {data.mitigationNotice ||
+          {activeData.mitigationNotice ||
             'Masyarakat dihimbau memantau sensor debit sungai real-time, menghindari berteduh di bawah lereng curam, serta memilih rute aman saat curah hujan meningkat.'}
         </p>
       </div>

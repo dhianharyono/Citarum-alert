@@ -10,7 +10,7 @@ import {
   MapPin,
   CheckCircle2,
 } from 'lucide-react';
-import { DEFAULT_BULLETIN, SituationalBulletinData } from '@/lib/bulletin-store';
+import { DEFAULT_BULLETIN, SituationalBulletinData } from '@/lib/bulletin-types';
 
 export function SituationalBriefing() {
   const [isExpanded, setIsExpanded] = useState(true);

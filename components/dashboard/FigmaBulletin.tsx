@@ -8,7 +8,7 @@ import {
   Car,
   Mountain,
 } from 'lucide-react';
-import { SituationalBulletinData, DEFAULT_BULLETIN } from '@/lib/bulletin-store';
+import { SituationalBulletinData, DEFAULT_BULLETIN } from '@/lib/bulletin-types';
 
 interface FigmaBulletinProps {
   bulletin?: SituationalBulletinData | null;
@@ -74,20 +74,18 @@ function getRegionIconAndStyle(reg: { region?: string; location?: string; status
 }
 
 export function FigmaBulletin({ bulletin, lastUpdated }: FigmaBulletinProps) {
-  const [data, setData] = useState<SituationalBulletinData>(bulletin || DEFAULT_BULLETIN);
+  const [fetchedData, setFetchedData] = useState<SituationalBulletinData | null>(null);
 
-  // Sync if props update, or fetch from API if not supplied
+  // Fetch only if bulletin is not supplied via props
   useEffect(() => {
-    if (bulletin) {
-      setData(bulletin);
-      return;
-    }
+    if (bulletin) return;
+
     let isCancelled = false;
     fetch('/api/bulletin')
       .then((r) => r.json())
       .then((res) => {
         if (!isCancelled && res.success && res.data) {
-          setData(res.data);
+          setFetchedData(res.data);
         }
       })
       .catch(() => {});
@@ -97,8 +95,12 @@ export function FigmaBulletin({ bulletin, lastUpdated }: FigmaBulletinProps) {
     };
   }, [bulletin]);
 
-  const displayTime = data.lastUpdated || lastUpdated || '1 November 2026, 21:45 WIB';
-  const regionsList = Array.isArray(data.regions) && data.regions.length > 0 ? data.regions : DEFAULT_BULLETIN.regions;
+  const activeData = bulletin || fetchedData || DEFAULT_BULLETIN;
+  const displayTime = activeData.lastUpdated || lastUpdated || '1 November 2026, 21:45 WIB';
+  const regionsList =
+    Array.isArray(activeData.regions) && activeData.regions.length > 0
+      ? activeData.regions
+      : DEFAULT_BULLETIN.regions;
 
   return (
     <div className="w-full bg-white border border-[#dce2e2] rounded-md overflow-hidden shadow-xs flex flex-col">
@@ -106,7 +108,7 @@ export function FigmaBulletin({ bulletin, lastUpdated }: FigmaBulletinProps) {
       <div className="p-4 sm:p-5 border-b border-[#dce2e2] flex items-center justify-between">
         <div>
           <h2 className="text-[17px] font-bold text-[#173744]">
-            {data.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
+            {activeData.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
           </h2>
           <p className="text-xs text-[#66757c] mt-0.5">
             Pembaruan website • {displayTime}
@@ -161,10 +163,10 @@ export function FigmaBulletin({ bulletin, lastUpdated }: FigmaBulletinProps) {
       {/* Footer Notes */}
       <div className="p-4 sm:px-5 bg-[#f8faf9] border-t border-[#dce2e2] space-y-0.5 text-[11px] text-[#66757c]">
         <div>
-          Rujukan pada website: {data.sources || 'Pusdalops BPBD Kabupaten Bandung, BMKG Stasiun Geofisika Bandung & TMC Polresta Bandung.'}
+          Rujukan pada website: {activeData.sources || 'Pusdalops BPBD Kabupaten Bandung, BMKG Stasiun Geofisika Bandung & TMC Polresta Bandung.'}
         </div>
         <div>
-          {data.period || 'Ringkasan November 2026'}. {data.mitigationNotice || 'Bukan verifikasi kondisi lapangan terbaru.'}
+          {activeData.period || 'Ringkasan November 2026'}. {activeData.mitigationNotice || 'Bukan verifikasi kondisi lapangan terbaru.'}
         </div>
       </div>
     </div>
