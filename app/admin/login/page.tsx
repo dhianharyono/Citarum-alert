@@ -296,7 +296,7 @@ export default function AdminLoginPage() {
 
         {/* Bottom Context Watermark */}
         <div className='text-center text-[11px] text-[#66757c] py-2'>
-          CitarumAlert · Pusat Pengawasan Data &amp; Konfigurasi AI Bencana
+          Citarum Alert · Pusat Pengawasan Data &amp; Konfigurasi AI Bencana
         </div>
       </div>
     </div>

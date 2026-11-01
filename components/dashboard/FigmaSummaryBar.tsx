@@ -46,7 +46,7 @@ export function FigmaSummaryBar({
         <div className='flex items-start justify-between'>
           <div>
             <h1 className='text-[30px] lg:text-[32px] font-bold text-[#173744] tracking-tight leading-tight'>
-              Pemantauan Banjir & Siaga Warga
+              Pemantauan banjir & siaga warga
             </h1>
             <p className='text-[14px] text-[#66757c] mt-1'>
               Telemetri Sensor Sungai Resmi &amp; Crowdsourcing Siaga Warga
@@ -120,9 +120,8 @@ export function FigmaSummaryBar({
               className='h-9 px-3.5 rounded bg-white hover:bg-slate-50 border border-[#dce2e2] text-xs font-semibold text-[#173744] flex items-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-60'
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 text-[#126b70] ${
-                  isRefreshing ? 'animate-spin' : ''
-                }`}
+                className={`w-3.5 h-3.5 text-[#126b70] ${isRefreshing ? 'animate-spin' : ''
+                  }`}
               />
               <span>{isRefreshing ? 'Memuat...' : 'Refresh'}</span>
             </button>

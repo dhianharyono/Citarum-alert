@@ -11,13 +11,11 @@ import {
   Info,
   Send,
   ImagePlus,
-  Video,
   CheckCircle2,
   AlertTriangle,
   Loader2,
 } from 'lucide-react';
 import { CreateReportInput, WaterDepthCategory } from '@/types';
-import { Button } from '@/components/ui/Button';
 
 interface ReportFormModalProps {
   isOpen: boolean;
@@ -355,11 +353,10 @@ export function ReportFormModal({
                       type='button'
                       onClick={handleLockGPS}
                       disabled={isGpsLoading}
-                      className={`w-full h-11 px-4 rounded border text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${
-                        gpsLocked
-                          ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70]'
-                          : 'bg-white hover:bg-[#f5f6f5] border-[#dce2e2] text-[#126b70]'
-                      }`}
+                      className={`w-full h-11 px-4 rounded border text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${gpsLocked
+                        ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70]'
+                        : 'bg-white hover:bg-[#f5f6f5] border-[#dce2e2] text-[#126b70]'
+                        }`}
                     >
                       {isGpsLoading ? (
                         <>
@@ -439,11 +436,10 @@ export function ReportFormModal({
                           type='button'
                           key={category}
                           onClick={() => setDepthCategory(category)}
-                          className={`p-2.5 rounded border text-left text-xs font-medium transition cursor-pointer ${
-                            depthCategory === category
-                              ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70] font-bold'
-                              : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b]'
-                          }`}
+                          className={`p-2.5 rounded border text-left text-xs font-medium transition cursor-pointer ${depthCategory === category
+                            ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70] font-bold'
+                            : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b]'
+                            }`}
                         >
                           {category}
                         </button>
@@ -477,22 +473,20 @@ export function ReportFormModal({
                     <button
                       type='button'
                       onClick={() => setEvidenceType('photo')}
-                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${
-                        evidenceType === 'photo'
-                          ? 'bg-[#eaf3f1] text-[#126b70]'
-                          : 'text-[#66757c] hover:text-[#172d3b]'
-                      }`}
+                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${evidenceType === 'photo'
+                        ? 'bg-[#eaf3f1] text-[#126b70]'
+                        : 'text-[#66757c] hover:text-[#172d3b]'
+                        }`}
                     >
                       Foto Lapangan
                     </button>
                     <button
                       type='button'
                       onClick={() => setEvidenceType('tiktok')}
-                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${
-                        evidenceType === 'tiktok'
-                          ? 'bg-[#eaf3f1] text-[#126b70]'
-                          : 'text-[#66757c] hover:text-[#172d3b]'
-                      }`}
+                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${evidenceType === 'tiktok'
+                        ? 'bg-[#eaf3f1] text-[#126b70]'
+                        : 'text-[#66757c] hover:text-[#172d3b]'
+                        }`}
                     >
                       URL Live TikTok
                     </button>
@@ -635,11 +629,10 @@ export function ReportFormModal({
               <button
                 type='submit'
                 disabled={!isFormValid || isSubmitting}
-                className={`h-11 px-6 rounded font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs ${
-                  isFormValid && !isSubmitting
-                    ? 'bg-[#126b70] hover:bg-[#0e5458] text-white'
-                    : 'bg-[#e4e9e9] text-[#718087] cursor-not-allowed opacity-80'
-                }`}
+                className={`h-11 px-6 rounded font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs ${isFormValid && !isSubmitting
+                  ? 'bg-[#126b70] hover:bg-[#0e5458] text-white'
+                  : 'bg-[#e4e9e9] text-[#718087] cursor-not-allowed opacity-80'
+                  }`}
               >
                 {isSubmitting ? (
                   <>

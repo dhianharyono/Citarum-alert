@@ -26,6 +26,8 @@ import {
   Lock,
   FileText,
   Sparkles,
+  Radio,
+  ShieldCheck,
 } from 'lucide-react';
 import { FloodReport, AWLRStation } from '@/types';
 import { FALLBACK_AWLR_STATIONS } from '@/lib/scraper';
@@ -41,7 +43,7 @@ interface ConfigState {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'reports' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'reports' | 'bulletin' | 'settings'>('overview');
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
   // Telemetry Stations
@@ -455,42 +457,48 @@ export default function AdminDashboardPage() {
           <nav className="flex items-center gap-6 sm:gap-8 h-14 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`h-full text-xs sm:text-sm font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
-                activeTab === 'overview'
-                  ? 'border-[#126b70] text-[#126b70]'
-                  : 'border-transparent text-[#66757c] hover:text-[#172d3b]'
-              }`}
+              className={`h-full text-xs sm:text-sm font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${activeTab === 'overview'
+                ? 'border-[#126b70] text-[#126b70]'
+                : 'border-transparent text-[#66757c] hover:text-[#172d3b]'
+                }`}
             >
               <span>Ringkasan &amp; Telemetri</span>
             </button>
 
             <button
               onClick={() => setActiveTab('reports')}
-              className={`h-full text-xs sm:text-sm font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
-                activeTab === 'reports'
-                  ? 'border-[#126b70] text-[#126b70]'
-                  : 'border-transparent text-[#66757c] hover:text-[#172d3b]'
-              }`}
+              className={`h-full text-xs sm:text-sm font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${activeTab === 'reports'
+                ? 'border-[#126b70] text-[#126b70]'
+                : 'border-transparent text-[#66757c] hover:text-[#172d3b]'
+                }`}
             >
               <span>Kelola Laporan Warga</span>
               <span
-                className={`text-[11px] px-1.5 py-0.2 rounded-full font-bold ${
-                  activeTab === 'reports'
-                    ? 'bg-[#126b70] text-white'
-                    : 'bg-[#edf0e9] text-[#66757c]'
-                }`}
+                className={`text-[11px] px-1.5 py-0.2 rounded-full font-bold ${activeTab === 'reports'
+                  ? 'bg-[#126b70] text-white'
+                  : 'bg-[#edf0e9] text-[#66757c]'
+                  }`}
               >
                 {reports.length}
               </span>
             </button>
 
             <button
+              onClick={() => setActiveTab('bulletin')}
+              className={`h-full text-xs sm:text-sm font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${activeTab === 'bulletin'
+                ? 'border-[#126b70] text-[#126b70]'
+                : 'border-transparent text-[#66757c] hover:text-[#172d3b]'
+                }`}
+            >
+              <span>Pengelolaan Buletin Situasi Wilayah</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('settings')}
-              className={`h-full text-xs sm:text-sm font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
-                activeTab === 'settings'
-                  ? 'border-[#126b70] text-[#126b70]'
-                  : 'border-transparent text-[#66757c] hover:text-[#172d3b]'
-              }`}
+              className={`h-full text-xs sm:text-sm font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${activeTab === 'settings'
+                ? 'border-[#126b70] text-[#126b70]'
+                : 'border-transparent text-[#66757c] hover:text-[#172d3b]'
+                }`}
             >
               <span>Pengaturan LLM &amp; Sistem</span>
             </button>
@@ -616,10 +624,10 @@ export default function AdminDashboardPage() {
                       const badgeStyle = isAwas
                         ? 'bg-[#fbeeeb] text-[#b33e35] border-[#f5c6cb]'
                         : isSiaga
-                        ? 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]'
-                        : isWaspada
-                        ? 'bg-[#f7f2df] text-[#866a20] border-[#fde8a0]'
-                        : 'bg-[#edf4f0] text-[#497665] border-[#c3e6cb]';
+                          ? 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]'
+                          : isWaspada
+                            ? 'bg-[#f7f2df] text-[#866a20] border-[#fde8a0]'
+                            : 'bg-[#edf4f0] text-[#497665] border-[#c3e6cb]';
 
                       return (
                         <tr key={st.id} className="hover:bg-[#fbfcfb] transition-colors">
@@ -655,10 +663,10 @@ export default function AdminDashboardPage() {
                   const badgeStyle = isAwas
                     ? 'bg-[#fbeeeb] text-[#b33e35] border-[#f5c6cb]'
                     : isSiaga
-                    ? 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]'
-                    : isWaspada
-                    ? 'bg-[#f7f2df] text-[#866a20] border-[#fde8a0]'
-                    : 'bg-[#edf4f0] text-[#497665] border-[#c3e6cb]';
+                      ? 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]'
+                      : isWaspada
+                        ? 'bg-[#f7f2df] text-[#866a20] border-[#fde8a0]'
+                        : 'bg-[#edf4f0] text-[#497665] border-[#c3e6cb]';
 
                   return (
                     <div key={st.id} className="p-4 space-y-2">
@@ -685,117 +693,6 @@ export default function AdminDashboardPage() {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* Buletin Management Section (Pengelolaan Buletin Situasi Wilayah) */}
-            <div className="bg-white border border-[#dce2e2] rounded-md shadow-xs p-5 sm:p-6 space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#dce2e2]">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-[#126b70]" />
-                    <h2 className="text-base sm:text-lg font-bold text-[#172d3b]">
-                      Pengelolaan Buletin Situasi Wilayah (AI Kebencanaan)
-                    </h2>
-                  </div>
-                  <p className="text-xs text-[#66757c]">
-                    Generate ringkasan situasi bencana &amp; jalur transportasi se-Kabupaten Bandung dengan AI untuk dipublikasikan di halaman warga.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[11px] font-bold px-2.5 py-1 rounded bg-[#eaf3f1] text-[#497665] border border-[#c3e6cb] uppercase tracking-wider">
-                    Aktif di Halaman Publik
-                  </span>
-                </div>
-              </div>
-
-              {bulletinMessage && (
-                <div
-                  className={`p-3.5 rounded text-xs flex items-start gap-2 ${
-                    bulletinMessage.type === 'success'
-                      ? 'bg-[#eaf3f1] border border-[#c3e6cb] text-[#497665]'
-                      : 'bg-[#fbeeeb] border border-[#f5c6cb] text-[#b33e35]'
-                  }`}
-                >
-                  {bulletinMessage.type === 'success' ? (
-                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                  ) : (
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  )}
-                  <span>{bulletinMessage.text}</span>
-                </div>
-              )}
-
-              {/* Current Bulletin Summary Box */}
-              <div className="bg-[#f8faf9] border border-[#dce2e2] rounded p-4 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                  <span className="font-bold text-[#172d3b] text-sm">
-                    {bulletin?.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
-                  </span>
-                  <span className="text-[#66757c] font-medium">
-                    {bulletin?.lastUpdated || 'Belum diperbarui'}
-                  </span>
-                </div>
-
-                <p className="text-xs text-[#172d3b] leading-relaxed">
-                  {bulletin?.leadSummary ||
-                    'Belum ada buletin yang di-generate. Klik tombol di bawah untuk membuat analisis situasi menggunakan Gemini AI.'}
-                </p>
-
-                {/* Regions Grid */}
-                {bulletin?.regions && bulletin.regions.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-                    {bulletin.regions.map((reg, idx) => (
-                      <div
-                        key={idx}
-                        className="bg-white border border-[#dce2e2] rounded p-3 text-xs space-y-1"
-                      >
-                        <div className="flex items-center justify-between gap-1">
-                          <span className="font-bold text-[#172d3b] truncate">{reg.region}</span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#fcf2e4] text-[#a9621d] shrink-0">
-                            {reg.status}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-[#66757c]">{reg.location}</div>
-                        <div className="text-[11px] text-[#172d3b] line-clamp-2 leading-relaxed">
-                          {reg.condition}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={handleGenerateBulletin}
-                  disabled={isGeneratingBulletin}
-                  className="h-10 px-4 bg-[#126b70] hover:bg-[#0e5458] text-white text-xs font-semibold rounded shadow-xs flex items-center gap-2 transition cursor-pointer disabled:opacity-60"
-                >
-                  {isGeneratingBulletin ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Sedang Menganalisis Wilayah...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Generate / Perbarui Buletin dengan AI</span>
-                    </>
-                  )}
-                </button>
-
-                <Link
-                  href="/?tab=buletin"
-                  target="_blank"
-                  className="h-10 px-4 bg-white hover:bg-[#f5f6f5] border border-[#dce2e2] text-xs font-semibold text-[#172d3b] rounded shadow-2xs flex items-center gap-1.5 transition"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-[#172d3b]" />
-                  <span>Lihat di Halaman Buletin Publik</span>
-                </Link>
               </div>
             </div>
 
@@ -859,9 +756,8 @@ export default function AdminDashboardPage() {
                 className="h-11 px-4 bg-white hover:bg-[#f5f6f5] border border-[#dce2e2] rounded text-xs font-semibold text-[#172d3b] flex items-center justify-center gap-2 shadow-2xs transition cursor-pointer disabled:opacity-60"
               >
                 <RefreshCw
-                  className={`w-3.5 h-3.5 text-[#126b70] ${
-                    isLoadingReports ? 'animate-spin' : ''
-                  }`}
+                  className={`w-3.5 h-3.5 text-[#126b70] ${isLoadingReports ? 'animate-spin' : ''
+                    }`}
                 />
                 <span>Refresh</span>
               </button>
@@ -895,9 +791,9 @@ export default function AdminDashboardPage() {
                 const isVerified = report.isAiVerified;
                 const dateDisplay = report.createdAtIso
                   ? new Date(report.createdAtIso).toLocaleString('id-ID', {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    })
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })
                   : 'Waktu tidak tersedia';
 
                 return (
@@ -910,11 +806,10 @@ export default function AdminDashboardPage() {
                       {/* Top Meta Row */}
                       <div className="flex flex-wrap items-center gap-2.5">
                         <span
-                          className={`px-2.5 py-0.5 rounded text-[11px] font-bold border tracking-wide uppercase ${
-                            isVerified
-                              ? 'bg-[#eaf3f1] text-[#497665] border-[#c3e6cb]'
-                              : 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]'
-                          }`}
+                          className={`px-2.5 py-0.5 rounded text-[11px] font-bold border tracking-wide uppercase ${isVerified
+                            ? 'bg-[#eaf3f1] text-[#497665] border-[#c3e6cb]'
+                            : 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]'
+                            }`}
                         >
                           {isVerified ? 'Terverifikasi' : 'Menunggu Verifikasi'}
                         </span>
@@ -1005,11 +900,10 @@ export default function AdminDashboardPage() {
                           type="button"
                           onClick={() => handleToggleVerify(report)}
                           disabled={actionInProgress === `verify-${report.id}`}
-                          className={`w-full h-10 px-4 rounded text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${
-                            isVerified
-                              ? 'bg-white hover:bg-slate-50 border border-[#dce2e2] text-[#172d3b]'
-                              : 'bg-[#126b70] hover:bg-[#0e5458] text-white shadow-xs'
-                          }`}
+                          className={`w-full h-10 px-4 rounded text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${isVerified
+                            ? 'bg-white hover:bg-slate-50 border border-[#dce2e2] text-[#172d3b]'
+                            : 'bg-[#126b70] hover:bg-[#0e5458] text-white shadow-xs'
+                            }`}
                         >
                           {actionInProgress === `verify-${report.id}` ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1075,7 +969,284 @@ export default function AdminDashboardPage() {
         )}
 
         {/* ============================================================ */}
-        {/* TAB 3: PENGATURAN LLM & SISTEM (Desktop 15:4921 & Mobile 15:5034) */}
+        {/* TAB 3: PENGELOLAAN BULETIN WILAYAH (AI KEBENCANAAN)          */}
+        {/* ============================================================ */}
+        {activeTab === 'bulletin' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Page Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold tracking-wider text-[#66757c] uppercase block">
+                  SINTESIS SITUASI BENCANA KABUPATEN BANDUNG
+                </span>
+                <h1 className="text-2xl sm:text-[32px] font-bold text-[#172d3b] tracking-tight">
+                  Pengelolaan Buletin Situasi Wilayah
+                </h1>
+                <p className="text-xs sm:text-sm text-[#66757c]">
+                  Sintesis cerdas resmi berbasis AI Gemini Flash yang menggabungkan 7 sensor telemetri AWLR BBWS Citarum dan laporan warga untuk publikasi warga.
+                </p>
+              </div>
+
+              {/* Action Buttons in Header */}
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleGenerateBulletin}
+                  disabled={isGeneratingBulletin}
+                  className="h-11 px-5 bg-[#126b70] hover:bg-[#0e5458] text-white text-xs sm:text-sm font-semibold rounded shadow-xs flex items-center gap-2 transition cursor-pointer disabled:opacity-60"
+                >
+                  {isGeneratingBulletin ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Sedang Menganalisis Wilayah...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span>Generate / Perbarui dengan AI</span>
+                    </>
+                  )}
+                </button>
+
+                <Link
+                  href="/?tab=buletin"
+                  target="_blank"
+                  className="h-11 px-4 bg-white hover:bg-[#f5f6f5] border border-[#dce2e2] text-xs sm:text-sm font-semibold text-[#172d3b] rounded shadow-2xs flex items-center gap-2 transition"
+                >
+                  <ExternalLink className="w-4 h-4 text-[#172d3b]" />
+                  <span>Lihat Buletin Publik</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Notification Banner */}
+            {bulletinMessage && (
+              <div
+                className={`p-4 rounded-md text-xs sm:text-sm flex items-start gap-2.5 shadow-2xs ${bulletinMessage.type === 'success'
+                    ? 'bg-[#eaf3f1] border border-[#c3e6cb] text-[#497665]'
+                    : 'bg-[#fbeeeb] border border-[#f5c6cb] text-[#b33e35]'
+                  }`}
+              >
+                {bulletinMessage.type === 'success' ? (
+                  <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-[#497665]" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-[#b33e35]" />
+                )}
+                <div className="space-y-0.5">
+                  <div className="font-bold">
+                    {bulletinMessage.type === 'success' ? 'Berhasil Diperbarui' : 'Gagal Menghasilkan Buletin'}
+                  </div>
+                  <div>{bulletinMessage.text}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Stat Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 bg-white border border-[#dce2e2] rounded-md divide-y md:divide-y-0 md:divide-x divide-[#dce2e2] shadow-xs overflow-hidden">
+              <div className="p-4 sm:p-5 space-y-1">
+                <span className="text-[11px] font-bold text-[#66757c] uppercase tracking-wider block">
+                  Status Publikasi
+                </span>
+                <div className="flex items-center gap-1.5 pt-0.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#497665] animate-pulse" />
+                  <span className="text-xs sm:text-sm font-bold text-[#497665]">
+                    Aktif di Halaman Publik
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-5 space-y-1">
+                <span className="text-[11px] font-bold text-[#66757c] uppercase tracking-wider block">
+                  Terakhir Diperbarui
+                </span>
+                <div className="text-xs sm:text-sm font-semibold text-[#172d3b] pt-1 truncate">
+                  {bulletin?.lastUpdated || 'Belum diperbarui'}
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-5 space-y-1">
+                <span className="text-[11px] font-bold text-[#66757c] uppercase tracking-wider block">
+                  Input Telemetri AWLR
+                </span>
+                <div className="text-lg sm:text-xl font-bold text-[#172d3b] font-mono">
+                  {stations.length} <span className="text-xs font-sans text-[#66757c] font-normal">Stasiun Terpantau</span>
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-5 space-y-1">
+                <span className="text-[11px] font-bold text-[#66757c] uppercase tracking-wider block">
+                  Laporan Warga Terverifikasi
+                </span>
+                <div className="text-lg sm:text-xl font-bold text-[#126b70] font-mono">
+                  {verifiedCount} <span className="text-xs font-sans text-[#66757c] font-normal">Laporan Masuk</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Layout: 8 cols left + 4 cols right */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column (8 cols): Bulletin Narrative & 4 Zones */}
+              <div className="lg:col-span-8 space-y-6">
+                {/* Lead Summary Card */}
+                <div className="bg-white border border-[#dce2e2] rounded-md shadow-xs p-5 sm:p-6 space-y-4">
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#dce2e2]">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-[#126b70]" />
+                      <h2 className="text-base sm:text-lg font-bold text-[#172d3b]">
+                        {bulletin?.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
+                      </h2>
+                    </div>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded bg-[#f5f6f5] border border-[#dce2e2] text-[#66757c]">
+                      Lead Summary
+                    </span>
+                  </div>
+
+                  <div className="p-4 bg-[#f8faf9] rounded border border-[#e5e9e8] text-xs sm:text-sm text-[#172d3b] leading-relaxed">
+                    {bulletin?.leadSummary ||
+                      'Belum ada buletin yang di-generate. Klik tombol "Generate / Perbarui dengan AI" di kanan atas untuk membuat analisis situasi menggunakan model Gemini AI.'}
+                  </div>
+                </div>
+
+                {/* 4 Regional Zones Card */}
+                <div className="bg-white border border-[#dce2e2] rounded-md shadow-xs p-5 sm:p-6 space-y-4">
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#dce2e2]">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-[#126b70]" />
+                      <h2 className="text-base sm:text-lg font-bold text-[#172d3b]">
+                        Situasi 4 Koridor Strategis &amp; Akses Transportasi
+                      </h2>
+                    </div>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#eaf3f1] text-[#126b70]">
+                      4 Kawasan Pantauan
+                    </span>
+                  </div>
+
+                  {bulletin?.regions && bulletin.regions.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {bulletin.regions.map((reg, idx) => {
+                        const isSiaga = reg.status.toLowerCase().includes('siaga') || reg.status.toLowerCase().includes('awas');
+                        const isWaspada = reg.status.toLowerCase().includes('waspada') || reg.status.toLowerCase().includes('genangan');
+
+                        const statusBadge = isSiaga
+                          ? 'bg-[#fbeeeb] text-[#b33e35] border-[#f5c6cb]'
+                          : isWaspada
+                            ? 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]'
+                            : 'bg-[#edf4f0] text-[#497665] border-[#c3e6cb]';
+
+                        return (
+                          <div
+                            key={idx}
+                            className="bg-[#fafbfb] border border-[#dce2e2] rounded p-4 space-y-2.5 flex flex-col justify-between hover:border-[#126b70] transition-colors"
+                          >
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <h3 className="font-bold text-sm text-[#172d3b] truncate">
+                                  {reg.region}
+                                </h3>
+                                <span
+                                  className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider shrink-0 ${statusBadge}`}
+                                >
+                                  {reg.status}
+                                </span>
+                              </div>
+                              <div className="text-[11px] font-medium text-[#66757c] flex items-center gap-1">
+                                <MapPin className="w-3 h-3 text-[#126b70] shrink-0" />
+                                <span>{reg.location}</span>
+                              </div>
+                            </div>
+
+                            <p className="text-xs text-[#172d3b] leading-relaxed pt-2 border-t border-[#edf0e9]">
+                              {reg.condition}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center text-xs text-[#66757c]">
+                      Data kawasan belum tersedia. Silakan klik tombol Generate di atas.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column (4 cols): Live Telemetry Context & Guidelines */}
+              <div className="lg:col-span-4 space-y-6">
+                {/* Live Feeder Sensors */}
+                <div className="bg-white border border-[#dce2e2] rounded-md shadow-xs p-5 space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#dce2e2]">
+                    <div className="flex items-center gap-2">
+                      <Radio className="w-4 h-4 text-[#126b70]" />
+                      <h3 className="text-sm font-bold text-[#172d3b]">
+                        Data Telemetri AWLR Masukan
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-mono font-semibold text-[#66757c]">
+                      BBWS Citarum
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[#66757c] leading-relaxed">
+                    Data tinggi muka air (TMA) sensor sungai yang otomatis disuntikkan ke analisis sintesis AI:
+                  </p>
+
+                  <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                    {stations.map((st) => {
+                      const isHigh = st.status === 'SIAGA' || st.status === 'AWAS';
+                      return (
+                        <div
+                          key={st.id}
+                          className="p-2.5 rounded bg-[#f8faf9] border border-[#dce2e2] flex items-center justify-between text-xs"
+                        >
+                          <div>
+                            <div className="font-semibold text-[#172d3b]">{st.name}</div>
+                            <div className="text-[11px] text-[#66757c]">{st.river}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-mono font-bold text-[#172d3b]">
+                              {st.levelCm} cm
+                            </div>
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase ${isHigh ? 'bg-[#fbeeeb] text-[#b33e35]' : 'bg-[#edf4f0] text-[#497665]'
+                                }`}
+                            >
+                              {st.status}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* SOP & Publication Guidelines */}
+                <div className="bg-white border border-[#dce2e2] rounded-md shadow-xs p-5 space-y-3.5">
+                  <div className="flex items-center gap-2 pb-2 border-b border-[#dce2e2]">
+                    <ShieldCheck className="w-4 h-4 text-[#126b70]" />
+                    <h3 className="text-sm font-bold text-[#172d3b]">
+                      Protokol &amp; SOP Publikasi
+                    </h3>
+                  </div>
+
+                  <ul className="text-xs text-[#66757c] space-y-2 list-disc pl-4 leading-relaxed">
+                    <li>
+                      <strong className="text-[#172d3b]">Frekuensi Pembaruan:</strong> Dianjurkan menekan tombol generate ketika terjadi lonjakan TMA di atas batas waspada (Siaga/Awas) atau hujan deras intensif berdurasi &gt;1 jam.
+                    </li>
+                    <li>
+                      <strong className="text-[#172d3b]">Verifikasi Lapangan:</strong> AI secara otomatis mengintegrasikan foto warga yang telah tervalidasi ke dalam analisis genangan koridor jalan.
+                    </li>
+                    <li>
+                      <strong className="text-[#172d3b]">Sinkronisasi Publik:</strong> Buletin yang di-generate langsung tampil di tab Buletin pada beranda publik secara instan.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* TAB 4: PENGATURAN LLM & SISTEM (Desktop 15:4921 & Mobile 15:5034) */}
         {/* ============================================================ */}
         {activeTab === 'settings' && (
           <div className="space-y-6 animate-in fade-in duration-200">
@@ -1165,11 +1336,10 @@ export default function AdminDashboardPage() {
                     {/* Messages */}
                     {saveMessage && (
                       <div
-                        className={`p-3 rounded text-xs flex items-start gap-2 ${
-                          saveMessage.type === 'success'
-                            ? 'bg-[#eaf3f1] border border-[#c3e6cb] text-[#497665]'
-                            : 'bg-[#fbeeeb] border border-[#f5c6cb] text-[#b33e35]'
-                        }`}
+                        className={`p-3 rounded text-xs flex items-start gap-2 ${saveMessage.type === 'success'
+                          ? 'bg-[#eaf3f1] border border-[#c3e6cb] text-[#497665]'
+                          : 'bg-[#fbeeeb] border border-[#f5c6cb] text-[#b33e35]'
+                          }`}
                       >
                         {saveMessage.type === 'success' ? (
                           <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
@@ -1213,11 +1383,10 @@ export default function AdminDashboardPage() {
                     {/* Test Result Info Box */}
                     {testResult ? (
                       <div
-                        className={`p-3.5 rounded border text-xs flex items-start gap-2.5 animate-in fade-in ${
-                          testResult.success
-                            ? 'bg-[#eaf3f1] border-[#c3e6cb] text-[#497665]'
-                            : 'bg-[#fbeeeb] border-[#f5c6cb] text-[#b33e35]'
-                        }`}
+                        className={`p-3.5 rounded border text-xs flex items-start gap-2.5 animate-in fade-in ${testResult.success
+                          ? 'bg-[#eaf3f1] border-[#c3e6cb] text-[#497665]'
+                          : 'bg-[#fbeeeb] border-[#f5c6cb] text-[#b33e35]'
+                          }`}
                       >
                         {testResult.success ? (
                           <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
@@ -1396,7 +1565,7 @@ export default function AdminDashboardPage() {
       <footer className="w-full bg-white border-t border-[#dce2e2] mt-12 py-6 px-4 sm:px-6 lg:px-10">
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-[#66757c]">
           <div className="font-bold text-[#172d3b]">
-            CitarumAlert · Kabupaten Bandung
+            Citarum Alert · Kabupaten Bandung
           </div>
           <div>
             Portal pengawasan data &amp; konfigurasi AI bencana · Akses khusus admin
