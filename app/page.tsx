@@ -261,7 +261,7 @@ export default function DashboardPage() {
         {activeTab === 'pemantauan' && (
           <>
             {/* DESKTOP DASHBOARD (Figma Frame 3:1621, 1440px wide) */}
-            <div className="hidden md:flex flex-col gap-6">
+            <div className="hidden md:flex flex-col gap-3.5 sm:gap-4">
               <FigmaSummaryBar
                 stations={stations}
                 isRefreshing={isRefreshing}
@@ -270,8 +270,8 @@ export default function DashboardPage() {
               />
 
               {/* Row 1: Map (Left) + River Sensors (Right) */}
-              <div className="grid grid-cols-12 gap-6 items-stretch">
-                <div className="col-span-8 flex flex-col">
+              <div className="grid grid-cols-12 gap-5 md:h-[560px] items-stretch">
+                <div className="col-span-8 h-full flex flex-col">
                   <FloodMap
                     stations={stations}
                     reports={reports}
@@ -280,13 +280,13 @@ export default function DashboardPage() {
                   />
                 </div>
 
-                <div className="col-span-4 flex flex-col">
+                <div className="col-span-4 h-full flex flex-col">
                   <FigmaSensorPanel stations={stations} />
                 </div>
               </div>
 
               {/* Row 2: Bulletin (Left) + Citizen Panel (Right) */}
-              <div className="grid grid-cols-12 gap-6 items-start">
+              <div className="grid grid-cols-12 gap-5 items-start pt-1">
                 <div className="col-span-8">
                   <FigmaBulletin lastUpdated={lastUpdated} />
                 </div>
@@ -305,7 +305,7 @@ export default function DashboardPage() {
             </div>
 
             {/* MOBILE DASHBOARD (Figma Frame 3:11243, 412px wide) */}
-            <div className="flex md:hidden flex-col gap-5">
+            <div className="flex md:hidden flex-col gap-3.5">
               <FigmaSummaryBar
                 stations={stations}
                 isRefreshing={isRefreshing}

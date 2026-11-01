@@ -178,9 +178,9 @@ export default function FloodMap({
   };
 
   return (
-    <div className="w-full rounded-md overflow-hidden border border-[#dce2e2] shadow-xs relative bg-white flex flex-col">
+    <div className="w-full h-full md:h-[560px] rounded-md overflow-hidden border border-[#dce2e2] shadow-xs relative bg-white flex flex-col">
       {/* Top Map Control Bar */}
-      <div className="bg-white px-4 sm:px-5 py-3 border-b border-[#dce2e2] z-10 flex flex-wrap items-center justify-between gap-2">
+      <div className="bg-white px-4 sm:px-5 py-3 border-b border-[#dce2e2] z-10 flex flex-wrap items-center justify-between gap-2 shrink-0">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-[#126b70] shrink-0" />
           <h2 className="text-[17px] font-bold text-[#173744]">
@@ -213,12 +213,12 @@ export default function FloodMap({
       </div>
 
       {/* Interactive Map Box */}
-      <div className="w-full h-[400px] sm:h-[460px] relative bg-[#edf0e9]">
+      <div className="w-full flex-1 min-h-[380px] relative bg-[#edf0e9]">
         <MapContainer
           center={[-6.9850, 107.6250]}
           zoom={12}
           scrollWheelZoom={true}
-          style={{ width: '100%', height: '100%', minHeight: '400px' }}
+          style={{ width: '100%', height: '100%' }}
           className="w-full h-full z-0"
         >
           {/* Helper component to invalidate size and control center */}
@@ -421,7 +421,7 @@ export default function FloodMap({
       </div>
 
       {/* Footer Legenda (Figma Legenda 912x38) */}
-      <div className="bg-[#f8faf9] px-4 sm:px-5 py-2.5 border-t border-[#dce2e2] flex flex-wrap items-center justify-between gap-y-1 text-xs text-[#66757c]">
+      <div className="bg-[#f8faf9] px-4 sm:px-5 py-2.5 border-t border-[#dce2e2] flex flex-wrap items-center justify-between gap-y-1 text-xs text-[#66757c] shrink-0">
         <div className="flex flex-wrap items-center gap-4">
           <span className="font-bold text-[#173744] uppercase tracking-wider text-[10px]">
             LEGENDA

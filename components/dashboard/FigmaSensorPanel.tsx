@@ -21,9 +21,9 @@ export function FigmaSensorPanel({ stations }: FigmaSensorPanelProps) {
   });
 
   return (
-    <div className="w-full bg-white border border-[#dce2e2] rounded-md overflow-hidden shadow-xs flex flex-col h-full">
+    <div className="w-full bg-white border border-[#dce2e2] rounded-md overflow-hidden shadow-xs flex flex-col h-full md:h-[560px]">
       {/* Header */}
-      <div className="p-4 sm:p-5 pb-3">
+      <div className="p-4 sm:p-5 pb-3 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Radio className="w-4 h-4 text-[#126b70]" />
@@ -41,12 +41,12 @@ export function FigmaSensorPanel({ stations }: FigmaSensorPanelProps) {
       </div>
 
       {/* Column Sub-label Bar */}
-      <div className="bg-[#f8faf9] px-4 sm:px-5 py-2 border-y border-[#dce2e2] text-[10px] sm:text-[11px] font-bold tracking-wider text-[#66757c] uppercase">
+      <div className="bg-[#f8faf9] px-4 sm:px-5 py-2 border-y border-[#dce2e2] text-[10px] sm:text-[11px] font-bold tracking-wider text-[#66757c] uppercase shrink-0">
         LOKASI PANTAU / TINGGI MUKA AIR (TMA)
       </div>
 
       {/* Station List (Scrollable if many stations) */}
-      <div className="flex-1 divide-y divide-[#dce2e2] overflow-y-auto max-h-[420px] custom-scrollbar">
+      <div className="flex-1 min-h-0 divide-y divide-[#dce2e2] overflow-y-auto custom-scrollbar">
         {sortedStations.length === 0 ? (
           <div className="p-8 text-center text-xs text-[#66757c]">
             Memuat data sensor sungai resmi...
@@ -109,7 +109,7 @@ export function FigmaSensorPanel({ stations }: FigmaSensorPanelProps) {
       </div>
 
       {/* Disclaimer / Note Footer */}
-      <div className="p-3.5 sm:px-5 bg-[#f8faf9] border-t border-[#dce2e2] flex items-start gap-2 text-[11px] text-[#66757c]">
+      <div className="p-3.5 sm:px-5 bg-[#f8faf9] border-t border-[#dce2e2] flex items-start gap-2 text-[11px] text-[#66757c] shrink-0">
         <Info className="w-3.5 h-3.5 text-[#126b70] shrink-0 mt-0.5" />
         <span className="leading-snug">
           Waktu tiap pembacaan otomatis terbarui tiap 5 menit dari jaringan sensor duga air resmi.

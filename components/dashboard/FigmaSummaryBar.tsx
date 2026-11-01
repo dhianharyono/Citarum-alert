@@ -39,9 +39,9 @@ export function FigmaSummaryBar({
   const displayDate = lastUpdated ? `Update: ${lastUpdated} WIB` : '1 Nov 2026';
 
   return (
-    <div className="w-full space-y-5">
+    <div className="w-full">
       {/* DESKTOP HEADER & STATS (Visible on md and up) */}
-      <div className="hidden md:flex flex-col gap-5">
+      <div className="hidden md:flex flex-col gap-4">
         {/* Row 1: Title and Time Context */}
         <div className="flex items-start justify-between">
           <div>
