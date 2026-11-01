@@ -63,6 +63,18 @@ export default function AdminDashboardPage() {
   // Action status tracker
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
 
+  // Reference time stored in state to ensure pure, idempotent renders (React 19 / Compiler compliant)
+  const [nowTimestamp, setNowTimestamp] = useState<number>(0);
+  const [todayDateKey, setTodayDateKey] = useState<string>('');
+
+  useEffect(() => {
+    const now = new Date();
+    setNowTimestamp(now.getTime());
+    setTodayDateKey(
+      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    );
+  }, []);
+
   // Check auth
   const verifyAuth = useCallback(async () => {
     try {
@@ -281,19 +293,15 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Filtered reports logic
+  // Filtered reports logic (pure, without inline Date.now or new Date calls)
   const filteredReports = reports.filter((r) => {
-    if (dateFilter === 'today' && r.createdAtIso) {
+    if (dateFilter === 'today' && r.createdAtIso && todayDateKey) {
       const d = new Date(r.createdAtIso);
-      const now = new Date();
-      const isToday =
-        d.getFullYear() === now.getFullYear() &&
-        d.getMonth() === now.getMonth() &&
-        d.getDate() === now.getDate();
-      if (!isToday) return false;
-    } else if (dateFilter === '7days' && r.createdAtIso) {
+      const itemKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (itemKey !== todayDateKey) return false;
+    } else if (dateFilter === '7days' && r.createdAtIso && nowTimestamp > 0) {
       const d = new Date(r.createdAtIso);
-      const diffDays = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
+      const diffDays = (nowTimestamp - d.getTime()) / (1000 * 60 * 60 * 24);
       if (diffDays > 7) return false;
     }
 
@@ -307,14 +315,10 @@ export default function AdminDashboardPage() {
   });
 
   const todayReportsCount = reports.filter((r) => {
-    if (!r.createdAtIso) return false;
+    if (!r.createdAtIso || !todayDateKey) return false;
     const d = new Date(r.createdAtIso);
-    const now = new Date();
-    return (
-      d.getFullYear() === now.getFullYear() &&
-      d.getMonth() === now.getMonth() &&
-      d.getDate() === now.getDate()
-    );
+    const itemKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return itemKey === todayDateKey;
   }).length;
 
   const verifiedCount = reports.filter((r) => r.isAiVerified).length;
