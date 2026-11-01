@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Newspaper,
   AlertTriangle,
@@ -8,60 +8,97 @@ import {
   Car,
   Mountain,
 } from 'lucide-react';
+import { SituationalBulletinData, DEFAULT_BULLETIN } from '@/lib/bulletin-store';
 
 interface FigmaBulletinProps {
+  bulletin?: SituationalBulletinData | null;
   lastUpdated?: string;
 }
 
-export function FigmaBulletin({ lastUpdated }: FigmaBulletinProps) {
-  const displayTime = lastUpdated || '1 November 2026, 21:45 WIB';
+function getRegionIconAndStyle(reg: { region?: string; location?: string; status?: string }) {
+  const text = `${reg.region || ''} ${reg.location || ''}`.toLowerCase();
+  const lowerStatus = (reg.status || '').toLowerCase();
 
-  const bulletinItems = [
-    {
-      id: 'dayeuhkolot',
-      icon: AlertTriangle,
-      iconColor: 'text-[#a9621d]',
-      iconBg: 'bg-[#fcf2e4]',
-      title: 'Dayeuhkolot, Baleendah & Bojongsoang',
-      badge: 'Siaga genangan',
-      badgeClass: 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]',
-      desc: 'Genangan 20–50 cm saat hujan deras di akses Jembatan Lama Dayeuhkolot / Jl. Raya Andir–Baleendah.',
-      action: 'Pengalihan: melalui Jembatan Baru Dayeuhkolot.',
-    },
-    {
-      id: 'kopo',
-      icon: Bike,
-      iconColor: 'text-[#a9621d]',
-      iconBg: 'bg-[#fcf2e4]',
-      title: 'Kopo Sayati, Cibaduyut & Katapang',
-      badge: 'Roda 2 waspada',
-      badgeClass: 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]',
-      desc: 'Genangan 30–50 cm saat hujan lebih dari 1 jam.',
-      action: 'Pengendara roda dua perlu meningkatkan kewaspadaan.',
-    },
-    {
-      id: 'rancaekek',
-      icon: Car,
-      iconColor: 'text-[#497665]',
-      iconBg: 'bg-[#eaf3f1]',
-      title: 'Rancaekek & Majalaya',
-      badge: 'Bisa dilewati',
-      badgeClass: 'bg-[#eaf3f1] text-[#497665] border-[#c3e6cb]',
-      desc: 'Sisa genangan 10–20 cm di lajur kiri kawasan Kahatex.',
-      action: 'Kurangi kecepatan saat melintas.',
-    },
-    {
-      id: 'pangalengan',
-      icon: Mountain,
-      iconColor: 'text-[#a9621d]',
-      iconBg: 'bg-[#fcf2e4]',
-      title: 'Pangalengan, Ciwidey, Ibun & Pasirjambu',
-      badge: 'Waspada longsor',
-      badgeClass: 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]',
-      desc: 'Potensi longsor di wilayah perbukitan.',
-      action: 'Tingkatkan kewaspadaan terutama sore hingga malam.',
-    },
-  ];
+  let Icon = AlertTriangle;
+  if (
+    text.includes('kopo') ||
+    text.includes('sayati') ||
+    text.includes('cibaduyut') ||
+    text.includes('roda 2') ||
+    text.includes('motor')
+  ) {
+    Icon = Bike;
+  } else if (
+    text.includes('rancaekek') ||
+    text.includes('jalan') ||
+    text.includes('majalaya') ||
+    text.includes('kahatex') ||
+    text.includes('mobil')
+  ) {
+    Icon = Car;
+  } else if (
+    text.includes('pangalengan') ||
+    text.includes('ciwidey') ||
+    text.includes('ibun') ||
+    text.includes('lereng') ||
+    text.includes('longsor') ||
+    text.includes('pasirjambu')
+  ) {
+    Icon = Mountain;
+  }
+
+  let iconBg = 'bg-[#fcf2e4]';
+  let iconColor = 'text-[#a9621d]';
+  let badgeClass = 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]';
+
+  if (lowerStatus.includes('awas') || lowerStatus.includes('bahaya') || lowerStatus.includes('tergenang parah')) {
+    iconBg = 'bg-[#fbeeeb]';
+    iconColor = 'text-[#b33e35]';
+    badgeClass = 'bg-[#fbeeeb] text-[#b33e35] border-[#f5c6cb]';
+  } else if (lowerStatus.includes('siaga') || lowerStatus.includes('waspada')) {
+    iconBg = 'bg-[#fcf2e4]';
+    iconColor = 'text-[#a9621d]';
+    badgeClass = 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]';
+  } else if (
+    lowerStatus.includes('lancar') ||
+    lowerStatus.includes('bisa dilewati') ||
+    lowerStatus.includes('normal') ||
+    lowerStatus.includes('aman')
+  ) {
+    iconBg = 'bg-[#eaf3f1]';
+    iconColor = 'text-[#497665]';
+    badgeClass = 'bg-[#eaf3f1] text-[#497665] border-[#c3e6cb]';
+  }
+
+  return { Icon, iconBg, iconColor, badgeClass };
+}
+
+export function FigmaBulletin({ bulletin, lastUpdated }: FigmaBulletinProps) {
+  const [data, setData] = useState<SituationalBulletinData>(bulletin || DEFAULT_BULLETIN);
+
+  // Sync if props update, or fetch from API if not supplied
+  useEffect(() => {
+    if (bulletin) {
+      setData(bulletin);
+      return;
+    }
+    let isCancelled = false;
+    fetch('/api/bulletin')
+      .then((r) => r.json())
+      .then((res) => {
+        if (!isCancelled && res.success && res.data) {
+          setData(res.data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [bulletin]);
+
+  const displayTime = data.lastUpdated || lastUpdated || '1 November 2026, 21:45 WIB';
+  const regionsList = Array.isArray(data.regions) && data.regions.length > 0 ? data.regions : DEFAULT_BULLETIN.regions;
 
   return (
     <div className="w-full bg-white border border-[#dce2e2] rounded-md overflow-hidden shadow-xs flex flex-col">
@@ -69,7 +106,7 @@ export function FigmaBulletin({ lastUpdated }: FigmaBulletinProps) {
       <div className="p-4 sm:p-5 border-b border-[#dce2e2] flex items-center justify-between">
         <div>
           <h2 className="text-[17px] font-bold text-[#173744]">
-            Buletin Informasi Terkini Kabupaten Bandung
+            {data.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
           </h2>
           <p className="text-xs text-[#66757c] mt-0.5">
             Pembaruan website • {displayTime}
@@ -82,15 +119,15 @@ export function FigmaBulletin({ lastUpdated }: FigmaBulletinProps) {
 
       {/* Corridor Rows */}
       <div className="divide-y divide-[#dce2e2]">
-        {bulletinItems.map((item) => {
-          const Icon = item.icon;
+        {regionsList.map((item, idx) => {
+          const { Icon, iconBg, iconColor, badgeClass } = getRegionIconAndStyle(item);
           return (
             <div
-              key={item.id}
+              key={idx}
               className="p-4 sm:p-5 flex items-start gap-3.5 hover:bg-[#fbfcfb] transition-colors"
             >
               <div
-                className={`w-7 h-7 rounded flex items-center justify-center shrink-0 mt-0.5 ${item.iconBg} ${item.iconColor}`}
+                className={`w-7 h-7 rounded flex items-center justify-center shrink-0 mt-0.5 ${iconBg} ${iconColor}`}
               >
                 <Icon className="w-4 h-4" />
               </div>
@@ -98,21 +135,23 @@ export function FigmaBulletin({ lastUpdated }: FigmaBulletinProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                   <div className="font-semibold text-sm text-[#173744]">
-                    {item.title}
+                    {item.location || item.region}
                   </div>
                   <span
-                    className={`text-[11px] font-bold px-2 py-0.5 rounded border tracking-wide uppercase shrink-0 ${item.badgeClass}`}
+                    className={`text-[11px] font-bold px-2 py-0.5 rounded border tracking-wide uppercase shrink-0 ${badgeClass}`}
                   >
-                    {item.badge}
+                    {item.status}
                   </span>
                 </div>
 
                 <p className="text-xs text-[#173744] leading-relaxed">
-                  {item.desc}
+                  {item.condition}
                 </p>
-                <p className="text-xs font-semibold text-[#173744] mt-0.5 leading-relaxed">
-                  {item.action}
-                </p>
+                {item.region && item.region !== item.location && (
+                  <p className="text-[11px] text-[#66757c] mt-0.5 font-medium">
+                    Kawasan: {item.region}
+                  </p>
+                )}
               </div>
             </div>
           );
@@ -122,10 +161,10 @@ export function FigmaBulletin({ lastUpdated }: FigmaBulletinProps) {
       {/* Footer Notes */}
       <div className="p-4 sm:px-5 bg-[#f8faf9] border-t border-[#dce2e2] space-y-0.5 text-[11px] text-[#66757c]">
         <div>
-          Rujukan pada website: Pusdalops BPBD Kabupaten Bandung, BMKG Stasiun Geofisika Bandung &amp; TMC Polresta Bandung.
+          Rujukan pada website: {data.sources || 'Pusdalops BPBD Kabupaten Bandung, BMKG Stasiun Geofisika Bandung & TMC Polresta Bandung.'}
         </div>
         <div>
-          Ringkasan awal November 2026. Bukan verifikasi kondisi lapangan terbaru.
+          {data.period || 'Ringkasan November 2026'}. {data.mitigationNotice || 'Bukan verifikasi kondisi lapangan terbaru.'}
         </div>
       </div>
     </div>

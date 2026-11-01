@@ -56,12 +56,74 @@ export const DEFAULT_BULLETIN: SituationalBulletinData = {
   lastUpdated: '1 November 2026, 21:45 WIB',
 };
 
-let currentBulletin: SituationalBulletinData = { ...DEFAULT_BULLETIN };
+// Safe Node.js modules resolver (avoids breaking client-side webpack builds)
+function getFs() {
+  if (typeof window === 'undefined') {
+    try {
+      return require('fs');
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function getPath() {
+  if (typeof window === 'undefined') {
+    try {
+      return require('path');
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+// Preserve bulletin in globalThis across Next.js API routes & dev module reloads
+const globalForBulletin = globalThis as unknown as {
+  currentBulletin?: SituationalBulletinData;
+};
 
 export function getCurrentBulletin(): SituationalBulletinData {
-  return currentBulletin;
+  if (globalForBulletin.currentBulletin) {
+    return globalForBulletin.currentBulletin;
+  }
+
+  // Try reading from persisted cache file on disk
+  const fs = getFs();
+  const path = getPath();
+  if (fs && path) {
+    try {
+      const cachePath = path.join(process.cwd(), '.bulletin-cache.json');
+      if (fs.existsSync(cachePath)) {
+        const fileContent = fs.readFileSync(cachePath, 'utf-8');
+        const parsed = JSON.parse(fileContent);
+        if (parsed && parsed.title && Array.isArray(parsed.regions)) {
+          globalForBulletin.currentBulletin = parsed;
+          return parsed;
+        }
+      }
+    } catch {
+      // Fallback to default
+    }
+  }
+
+  globalForBulletin.currentBulletin = { ...DEFAULT_BULLETIN };
+  return globalForBulletin.currentBulletin;
 }
 
 export function updateCurrentBulletin(newBulletin: SituationalBulletinData): void {
-  currentBulletin = newBulletin;
+  globalForBulletin.currentBulletin = newBulletin;
+
+  // Persist to disk cache
+  const fs = getFs();
+  const path = getPath();
+  if (fs && path) {
+    try {
+      const cachePath = path.join(process.cwd(), '.bulletin-cache.json');
+      fs.writeFileSync(cachePath, JSON.stringify(newBulletin, null, 2), 'utf-8');
+    } catch {
+      // Ignore write errors in read-only serverless filesystems
+    }
+  }
 }

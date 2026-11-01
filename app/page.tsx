@@ -14,6 +14,7 @@ import { FigmaCitizenFullPage } from '@/components/dashboard/FigmaCitizenFullPag
 import { FigmaFooter } from '@/components/dashboard/FigmaFooter';
 import { ReportFormModal } from '@/components/dashboard/ReportFormModal';
 import { Alert } from '@/components/ui/Alert';
+import { SituationalBulletinData } from '@/lib/bulletin-store';
 
 // Dynamic import with SSR disabled for Leaflet container
 const FloodMap = dynamic(() => import('@/components/map/FloodMap'), {
@@ -33,6 +34,7 @@ export default function DashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showRefreshToast, setShowRefreshToast] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [bulletin, setBulletin] = useState<SituationalBulletinData | null>(null);
   const [userVotes, setUserVotes] = useState<Record<string, 'upvote' | 'downvote'>>({});
   const [activeTab, setActiveTab] = useState<'pemantauan' | 'buletin' | 'laporan'>('pemantauan');
 
@@ -55,9 +57,10 @@ export default function DashboardPage() {
     setIsRefreshing(true);
     const start = Date.now();
     try {
-      const [resStations, resReports] = await Promise.all([
+      const [resStations, resReports, resBulletin] = await Promise.all([
         fetch('/api/stations').then((r) => r.json()),
         fetch('/api/reports').then((r) => r.json()),
+        fetch('/api/bulletin').then((r) => r.json()).catch(() => null),
       ]);
 
       if (resStations.success) {
@@ -66,6 +69,10 @@ export default function DashboardPage() {
 
       if (resReports.success) {
         setReports(resReports.data || []);
+      }
+
+      if (resBulletin && resBulletin.success && resBulletin.data) {
+        setBulletin(resBulletin.data);
       }
 
       setLastUpdated(
@@ -89,9 +96,10 @@ export default function DashboardPage() {
 
     const performFetch = async () => {
       try {
-        const [resStations, resReports] = await Promise.all([
+        const [resStations, resReports, resBulletin] = await Promise.all([
           fetch('/api/stations').then((r) => r.json()),
           fetch('/api/reports').then((r) => r.json()),
+          fetch('/api/bulletin').then((r) => r.json()).catch(() => null),
         ]);
 
         if (!isCancelled) {
@@ -101,6 +109,10 @@ export default function DashboardPage() {
 
           if (resReports.success) {
             setReports(resReports.data || []);
+          }
+
+          if (resBulletin && resBulletin.success && resBulletin.data) {
+            setBulletin(resBulletin.data);
           }
 
           setLastUpdated(
@@ -288,7 +300,7 @@ export default function DashboardPage() {
               {/* Row 2: Bulletin (Left) + Citizen Panel (Right) */}
               <div className="grid grid-cols-12 gap-5 items-start pt-1">
                 <div className="col-span-8">
-                  <FigmaBulletin lastUpdated={lastUpdated} />
+                  <FigmaBulletin bulletin={bulletin} lastUpdated={lastUpdated} />
                 </div>
 
                 <div className="col-span-4">
@@ -374,6 +386,7 @@ export default function DashboardPage() {
         {/* VIEW 2: TAB BULETIN WILAYAH (Full Page Frame 3:11384 & Frame 3:11500) */}
         {activeTab === 'buletin' && (
           <FigmaBulletinFullPage
+            bulletin={bulletin}
             lastUpdated={lastUpdated}
             onOpenReportModal={() => setIsModalOpen(true)}
           />

@@ -57,7 +57,7 @@ export function FigmaCitizenPanel({
 
         <p className='text-xs text-[#173744] leading-relaxed'>
           Melihat genangan di perjalanan? Bagikan lokasi dan kondisi yang Anda
-          temui di lapangan.
+          temui.
         </p>
 
         <button
@@ -200,11 +200,10 @@ export function FigmaCitizenPanel({
                           e.stopPropagation();
                           onUpvote(report.id);
                         }}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${
-                          userVote === 'upvote'
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${userVote === 'upvote'
                             ? 'bg-[#126b70] text-white'
                             : 'bg-[#f8faf9] text-[#66757c] hover:text-[#173744] border border-[#dce2e2]'
-                        }`}
+                          }`}
                         title='Konfirmasi genangan masih ada'
                       >
                         <ThumbsUp className='w-3 h-3' />
@@ -217,11 +216,10 @@ export function FigmaCitizenPanel({
                           e.stopPropagation();
                           onDownvote(report.id);
                         }}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${
-                          userVote === 'downvote'
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${userVote === 'downvote'
                             ? 'bg-rose-700 text-white'
                             : 'bg-[#f8faf9] text-[#66757c] hover:text-[#173744] border border-[#dce2e2]'
-                        }`}
+                          }`}
                         title='Kondisi sudah surut'
                       >
                         <span>{report.downvotes || 0}</span>
