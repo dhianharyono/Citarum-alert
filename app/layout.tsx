@@ -5,6 +5,15 @@ export const metadata: Metadata = {
   title: 'Citarum Alert - Pemantauan banjir & siaga warga Kab. Bandung',
   description:
     'Telemetri Sensor Sungai Resmi (AWLR BBWS / BPBD) & Crowdsourcing Siaga Warga Kabupaten Bandung.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({
