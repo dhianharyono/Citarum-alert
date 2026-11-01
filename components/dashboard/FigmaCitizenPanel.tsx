@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  Users,
-  Plus,
   MapPin,
   ChevronDown,
   Sparkles,
@@ -45,7 +43,7 @@ export function FigmaCitizenPanel({
   return (
     <div className='w-full space-y-5'>
       {/* CARD 1: BANTU SESAMA KOMUTER (Figma Mint Accent Card) */}
-      <div className='w-full bg-[#eaf3f1] border border-[#dce2e2] rounded-md p-5 space-y-3.5 shadow-xs'>
+      {/* <div className='w-full bg-[#eaf3f1] border border-[#dce2e2] rounded-md p-5 space-y-3.5 shadow-xs'>
         <div className='flex items-center gap-2.5'>
           <div className='w-8 h-8 rounded bg-white border border-[#dce2e2] flex items-center justify-center text-[#126b70] shadow-2xs'>
             <Users className='w-4 h-4 text-[#126b70]' />
@@ -71,7 +69,7 @@ export function FigmaCitizenPanel({
         <div className='text-[11px] text-[#66757c]'>
           Utamakan keselamatan saat mengambil foto.
         </div>
-      </div>
+      </div> */}
 
       {/* CARD 2: LAPORAN LAPANGAN WARGA (Figma White Feed Card) */}
       <div className='w-full bg-white border border-[#dce2e2] rounded-md p-5 space-y-4 shadow-xs'>
@@ -200,10 +198,11 @@ export function FigmaCitizenPanel({
                           e.stopPropagation();
                           onUpvote(report.id);
                         }}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${userVote === 'upvote'
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${
+                          userVote === 'upvote'
                             ? 'bg-[#126b70] text-white'
                             : 'bg-[#f8faf9] text-[#66757c] hover:text-[#173744] border border-[#dce2e2]'
-                          }`}
+                        }`}
                         title='Konfirmasi genangan masih ada'
                       >
                         <ThumbsUp className='w-3 h-3' />
@@ -216,10 +215,11 @@ export function FigmaCitizenPanel({
                           e.stopPropagation();
                           onDownvote(report.id);
                         }}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${userVote === 'downvote'
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${
+                          userVote === 'downvote'
                             ? 'bg-rose-700 text-white'
                             : 'bg-[#f8faf9] text-[#66757c] hover:text-[#173744] border border-[#dce2e2]'
-                          }`}
+                        }`}
                         title='Kondisi sudah surut'
                       >
                         <span>{report.downvotes || 0}</span>

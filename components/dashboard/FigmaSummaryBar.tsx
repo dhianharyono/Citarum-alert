@@ -17,24 +17,24 @@ export function FigmaSummaryBar({
   onRefresh,
   lastUpdated,
 }: FigmaSummaryBarProps) {
-  // Hitung jumlah stasiun berdasarkan status secara dinamis
+  // Hitung jumlah stasiun berdasarkan status secara dinamis dari data telemetri
   const counts = stations.reduce(
     (acc, st) => {
       const s = st.status?.toUpperCase();
       if (s === 'AWAS') acc.awas++;
       else if (s === 'SIAGA') acc.siaga++;
       else if (s === 'WASPADA') acc.waspada++;
-      else acc.normal++;
+      else if (s === 'NORMAL') acc.normal++;
       return acc;
     },
     { awas: 0, siaga: 0, waspada: 0, normal: 0 },
   );
 
-  // Jika stasiun kosong / belum termuat, sediakan nilai fallback dari data aktif
-  const awasCount = stations.length > 0 ? counts.awas : 1;
-  const siagaCount = stations.length > 0 ? counts.siaga : 2;
-  const waspadaCount = stations.length > 0 ? counts.waspada : 0;
-  const normalCount = stations.length > 0 ? counts.normal : 0;
+  // Nilai murni dari data telemetri aktual (tidak ada angka statis)
+  const awasCount = counts.awas;
+  const siagaCount = counts.siaga;
+  const waspadaCount = counts.waspada;
+  const normalCount = counts.normal;
 
   const displayDate = lastUpdated ? `Update: ${lastUpdated} WIB` : '1 Nov 2026';
 
@@ -72,7 +72,7 @@ export function FigmaSummaryBar({
               Status lokasi pantau
             </div>
             <div className='text-[11px] text-[#66757c] mt-0.5'>
-              Berdasarkan {stations.length || 3} stasiun sungai aktif
+              Berdasarkan {stations.length} stasiun sungai aktif
             </div>
           </div>
 
@@ -160,7 +160,7 @@ export function FigmaSummaryBar({
         <div className='space-y-1.5'>
           <div className='flex items-center justify-between'>
             <span className='text-[10px] font-bold tracking-wider text-[#66757c] uppercase'>
-              STATUS DARI {stations.length || 3} LOKASI PANTAU
+              STATUS DARI {stations.length} LOKASI PANTAU
             </span>
             <button
               onClick={onRefresh}

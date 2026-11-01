@@ -99,29 +99,6 @@ export function FigmaCitizenFullPage({
             kondisi lapangan.
           </p>
         </div>
-
-        <button
-          onClick={onOpenReportModal}
-          className='self-start md:self-auto h-11 px-5 rounded bg-[#126b70] hover:bg-[#0e5458] text-white font-medium text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-colors cursor-pointer'
-        >
-          <Plus className='w-4 h-4 stroke-[2.5]' />
-          <span>Laporkan Banjir</span>
-        </button>
-      </div>
-
-      {/* 2. NOTICE CARD (Frame 3:11612 / 3:11691 Catatan informasi) */}
-      <div className='p-4 sm:p-5 bg-[#eaf3f1] border border-[#dce2e2] rounded-md flex items-start gap-3'>
-        <Info className='w-5 h-5 text-[#126b70] shrink-0 mt-0.5' />
-        <div className='text-xs sm:text-sm text-[#173744] space-y-0.5'>
-          <div className='font-bold'>
-            Informasi komunitas, bukan keterangan resmi
-          </div>
-          <div className='text-xs text-[#66757c] leading-relaxed'>
-            Laporan warga melengkapi pemantauan, bukan menggantikan informasi
-            BPBD. Kondisi dapat berubah; jangan gunakan laporan sebagai jaminan
-            rute aman.
-          </div>
-        </div>
       </div>
 
       {/* 3. MAIN CONTENT 2-COLUMN (Frame 3:11612 Laporan dan panduan 1360x501) */}

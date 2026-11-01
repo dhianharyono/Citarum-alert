@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { ArrowRight, Plus } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { AWLRStation, FloodReport, CreateReportInput } from '@/types';
 import { FigmaNavbar } from '@/components/dashboard/FigmaNavbar';
 import { FigmaSummaryBar } from '@/components/dashboard/FigmaSummaryBar';
@@ -20,7 +20,7 @@ import { SituationalBulletinData } from '@/lib/bulletin-types';
 const FloodMap = dynamic(() => import('@/components/map/FloodMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[360px] sm:h-[462px] bg-white border border-[#dce2e2] rounded-md animate-pulse flex items-center justify-center text-[#66757c] text-xs">
+    <div className='w-full h-[360px] sm:h-[462px] bg-white border border-[#dce2e2] rounded-md animate-pulse flex items-center justify-center text-[#66757c] text-xs'>
       Memuat Peta Spasial Citarum Alert...
     </div>
   ),
@@ -29,14 +29,22 @@ const FloodMap = dynamic(() => import('@/components/map/FloodMap'), {
 export default function DashboardPage() {
   const [stations, setStations] = useState<AWLRStation[]>([]);
   const [reports, setReports] = useState<FloodReport[]>([]);
-  const [selectedReport, setSelectedReport] = useState<FloodReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<FloodReport | null>(
+    null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showRefreshToast, setShowRefreshToast] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('');
-  const [bulletin, setBulletin] = useState<SituationalBulletinData | null>(null);
-  const [userVotes, setUserVotes] = useState<Record<string, 'upvote' | 'downvote'>>({});
-  const [activeTab, setActiveTab] = useState<'pemantauan' | 'buletin' | 'laporan'>('pemantauan');
+  const [bulletin, setBulletin] = useState<SituationalBulletinData | null>(
+    null,
+  );
+  const [userVotes, setUserVotes] = useState<
+    Record<string, 'upvote' | 'downvote'>
+  >({});
+  const [activeTab, setActiveTab] = useState<
+    'pemantauan' | 'buletin' | 'laporan'
+  >('pemantauan');
 
   // Muat status voting yang tersimpan di localStorage agar user tidak bisa spam
   useEffect(() => {
@@ -60,7 +68,9 @@ export default function DashboardPage() {
       const [resStations, resReports, resBulletin] = await Promise.all([
         fetch('/api/stations').then((r) => r.json()),
         fetch('/api/reports').then((r) => r.json()),
-        fetch('/api/bulletin').then((r) => r.json()).catch(() => null),
+        fetch('/api/bulletin')
+          .then((r) => r.json())
+          .catch(() => null),
       ]);
 
       if (resStations.success) {
@@ -76,7 +86,10 @@ export default function DashboardPage() {
       }
 
       setLastUpdated(
-        new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+        new Date().toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       );
     } catch (err) {
       console.warn('Manual refresh failed:', err);
@@ -99,7 +112,9 @@ export default function DashboardPage() {
         const [resStations, resReports, resBulletin] = await Promise.all([
           fetch('/api/stations').then((r) => r.json()),
           fetch('/api/reports').then((r) => r.json()),
-          fetch('/api/bulletin').then((r) => r.json()).catch(() => null),
+          fetch('/api/bulletin')
+            .then((r) => r.json())
+            .catch(() => null),
         ]);
 
         if (!isCancelled) {
@@ -116,7 +131,10 @@ export default function DashboardPage() {
           }
 
           setLastUpdated(
-            new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+            new Date().toLocaleTimeString('id-ID', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
           );
         }
       } catch (err) {
@@ -174,7 +192,7 @@ export default function DashboardPage() {
           } else {
             return { ...r, downvotes: Math.max(0, (r.downvotes || 0) - 1) };
           }
-        })
+        }),
       );
     } else if (currentVote) {
       action = type === 'upvote' ? 'switch-to-upvote' : 'switch-to-downvote';
@@ -196,7 +214,7 @@ export default function DashboardPage() {
               downvotes: (r.downvotes || 0) + 1,
             };
           }
-        })
+        }),
       );
     } else {
       action = type;
@@ -210,7 +228,7 @@ export default function DashboardPage() {
           } else {
             return { ...r, downvotes: (r.downvotes || 0) + 1 };
           }
-        })
+        }),
       );
     }
 
@@ -243,18 +261,18 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f6f5] text-[#173744] flex flex-col font-sans selection:bg-[#126b70] selection:text-white">
+    <div className='min-h-screen bg-[#f5f6f5] text-[#173744] flex flex-col font-sans selection:bg-[#126b70] selection:text-white'>
       {/* Global Floating Toast Alert */}
       {showRefreshToast && (
         <Alert
           floating
-          position="top-center"
-          variant="success"
+          position='top-center'
+          variant='success'
           onClose={() => setShowRefreshToast(false)}
           autoClose={2500}
-          className="justify-between"
+          className='justify-between'
         >
-          <span className="font-semibold text-[#497665]">
+          <span className='font-semibold text-[#497665]'>
             Data telemetri &amp; laporan warga diperbarui
           </span>
         </Alert>
@@ -268,12 +286,12 @@ export default function DashboardPage() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-5 sm:py-7 space-y-6">
+      <main className='flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-5 sm:py-7 space-y-6'>
         {/* VIEW 1: TAB PEMANTAUAN (Dashboard Frame 3:1621 & Frame 3:11243) */}
         {activeTab === 'pemantauan' && (
           <>
             {/* DESKTOP DASHBOARD (Figma Frame 3:1621, 1440px wide) */}
-            <div className="hidden md:flex flex-col gap-3.5 sm:gap-4">
+            <div className='hidden md:flex flex-col gap-3.5 sm:gap-4'>
               <FigmaSummaryBar
                 stations={stations}
                 isRefreshing={isRefreshing}
@@ -282,8 +300,8 @@ export default function DashboardPage() {
               />
 
               {/* Row 1: Map (Left) + River Sensors (Right) */}
-              <div className="grid grid-cols-12 gap-5 md:h-[560px] items-stretch">
-                <div className="col-span-8 h-full flex flex-col">
+              <div className='grid grid-cols-12 gap-5 md:h-[560px] items-stretch'>
+                <div className='col-span-8 h-full flex flex-col'>
                   <FloodMap
                     stations={stations}
                     reports={reports}
@@ -292,18 +310,21 @@ export default function DashboardPage() {
                   />
                 </div>
 
-                <div className="col-span-4 h-full flex flex-col">
+                <div className='col-span-4 h-full flex flex-col'>
                   <FigmaSensorPanel stations={stations} />
                 </div>
               </div>
 
               {/* Row 2: Bulletin (Left) + Citizen Panel (Right) */}
-              <div className="grid grid-cols-12 gap-5 items-start pt-1">
-                <div className="col-span-8">
-                  <FigmaBulletin bulletin={bulletin} lastUpdated={lastUpdated} />
+              <div className='grid grid-cols-12 gap-5 items-start pt-1'>
+                <div className='col-span-8'>
+                  <FigmaBulletin
+                    bulletin={bulletin}
+                    lastUpdated={lastUpdated}
+                  />
                 </div>
 
-                <div className="col-span-4">
+                <div className='col-span-4'>
                   <FigmaCitizenPanel
                     reports={reports}
                     userVotes={userVotes}
@@ -317,7 +338,7 @@ export default function DashboardPage() {
             </div>
 
             {/* MOBILE DASHBOARD (Figma Frame 3:11243, 412px wide) */}
-            <div className="flex md:hidden flex-col gap-3.5">
+            <div className='flex md:hidden flex-col gap-3.5'>
               <FigmaSummaryBar
                 stations={stations}
                 isRefreshing={isRefreshing}
@@ -325,7 +346,7 @@ export default function DashboardPage() {
                 lastUpdated={lastUpdated}
               />
 
-              <div className="w-full">
+              <div className='w-full'>
                 <FloodMap
                   stations={stations}
                   reports={reports}
@@ -334,51 +355,42 @@ export default function DashboardPage() {
                 />
               </div>
 
-              <div className="w-full">
+              <div className='w-full'>
                 <FigmaSensorPanel stations={stations} />
               </div>
 
               {/* Quick Navigation Cards */}
-              <div className="w-full bg-white border border-[#dce2e2] rounded-md divide-y divide-[#dce2e2] shadow-xs overflow-hidden">
+              <div className='w-full bg-white border border-[#dce2e2] rounded-md divide-y divide-[#dce2e2] shadow-xs overflow-hidden'>
                 <button
                   onClick={() => handleTabChange('buletin')}
-                  className="w-full p-4 flex items-center justify-between text-left hover:bg-[#f8faf9] transition-colors cursor-pointer group"
+                  className='w-full p-4 flex items-center justify-between text-left hover:bg-[#f8faf9] transition-colors cursor-pointer group'
                 >
                   <div>
-                    <h3 className="text-[15px] font-bold text-[#173744]">
+                    <h3 className='text-[15px] font-bold text-[#173744]'>
                       Buletin wilayah
                     </h3>
-                    <p className="text-xs text-[#66757c] mt-0.5">
+                    <p className='text-xs text-[#66757c] mt-0.5'>
                       Ringkasan 4 wilayah • {lastUpdated || '1 Nov 2026'}
                     </p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#66757c] group-hover:text-[#126b70] transition-colors" />
+                  <ArrowRight className='w-4 h-4 text-[#66757c] group-hover:text-[#126b70] transition-colors' />
                 </button>
 
                 <button
                   onClick={() => handleTabChange('laporan')}
-                  className="w-full p-4 flex items-center justify-between text-left hover:bg-[#f8faf9] transition-colors cursor-pointer group"
+                  className='w-full p-4 flex items-center justify-between text-left hover:bg-[#f8faf9] transition-colors cursor-pointer group'
                 >
                   <div>
-                    <h3 className="text-[15px] font-bold text-[#173744]">
+                    <h3 className='text-[15px] font-bold text-[#173744]'>
                       Laporan warga
                     </h3>
-                    <p className="text-xs text-[#66757c] mt-0.5">
+                    <p className='text-xs text-[#66757c] mt-0.5'>
                       {reports.length} laporan • informasi komunitas
                     </p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#66757c] group-hover:text-[#126b70] transition-colors" />
+                  <ArrowRight className='w-4 h-4 text-[#66757c] group-hover:text-[#126b70] transition-colors' />
                 </button>
               </div>
-
-              {/* Mobile CTA */}
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full h-11 bg-[#126b70] hover:bg-[#0e5458] text-white rounded-md font-medium text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
-              >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
-                <span>Laporkan Banjir</span>
-              </button>
             </div>
           </>
         )}

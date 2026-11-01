@@ -244,25 +244,27 @@ export function FigmaBulletinFullPage({
                 {/* MOBILE STACKED CARD (Frame 3:11500) */}
                 <div className="flex lg:hidden flex-col gap-3">
                   {/* Header & Badge */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <Icon className="w-4 h-4 text-[#126b70] shrink-0" />
-                      <div>
-                        <h3 className="font-semibold text-sm text-[#172d3b]">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded bg-[#f5f6f5] border border-[#dce2e2] flex items-center justify-center text-[#126b70] shrink-0 mt-0.5">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center justify-between gap-1.5">
+                        <h3 className="font-bold text-sm text-[#172d3b] leading-tight">
                           {region.location || region.region}
                         </h3>
-                        {region.region && region.region !== region.location && (
-                          <span className="text-[10px] text-[#66757c]">
-                            {region.region}
-                          </span>
-                        )}
+                        <span
+                          className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider shrink-0 ${badgeClass}`}
+                        >
+                          {region.status}
+                        </span>
                       </div>
+                      {region.region && region.region !== region.location && (
+                        <div className="text-[11px] text-[#66757c] font-medium leading-snug">
+                          {region.region}
+                        </div>
+                      )}
                     </div>
-                    <span
-                      className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider shrink-0 ${badgeClass}`}
-                    >
-                      {region.status}
-                    </span>
                   </div>
 
                   {/* Kondisi */}

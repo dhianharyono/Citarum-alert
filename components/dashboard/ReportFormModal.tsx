@@ -596,9 +596,9 @@ export function ReportFormModal({
           <div className='p-4 sm:px-7 sm:py-5 border-t border-[#dce2e2] bg-[#f5f6f5] space-y-3.5 shrink-0'>
             {/* Status / Incomplete Notice */}
             {!isFormValid && (
-              <div className='flex items-center gap-2 text-xs text-[#66757c]'>
-                <Info className='w-4 h-4 text-[#66757c] shrink-0' />
-                <span className='leading-snug'>
+              <div className='flex items-start gap-2 text-xs text-[#66757c]'>
+                <Info className='w-4 h-4 text-[#66757c] shrink-0 mt-0.5' />
+                <span className='leading-relaxed'>
                   Belum bisa dikirim. Kunci GPS, isi deskripsi (min. 5
                   karakter), dan tambahkan foto atau URL Live TikTok.
                 </span>
@@ -606,18 +606,18 @@ export function ReportFormModal({
             )}
 
             {submitError && (
-              <div className='flex items-center gap-2 text-xs text-[#b33e35] bg-[#fbeeeb] p-2.5 rounded border border-[#f5c6cb]'>
-                <AlertTriangle className='w-4 h-4 shrink-0 text-[#b33e35]' />
-                <span className='leading-snug font-medium'>{submitError}</span>
+              <div className='flex items-start gap-2 text-xs text-[#b33e35] bg-[#fbeeeb] p-2.5 rounded border border-[#f5c6cb]'>
+                <AlertTriangle className='w-4 h-4 shrink-0 mt-0.5 text-[#b33e35]' />
+                <span className='leading-relaxed font-medium'>{submitError}</span>
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className='flex items-center justify-end gap-3'>
+            {/* Action Buttons: Equal-width Grid on Mobile, Right-aligned Flex on Desktop */}
+            <div className='grid grid-cols-2 gap-2.5 sm:flex sm:items-center sm:justify-end sm:gap-3'>
               <button
                 type='button'
                 onClick={onClose}
-                className='h-11 px-5 rounded bg-white hover:bg-[#edf0e9] border border-[#dce2e2] text-xs sm:text-sm font-semibold text-[#126b70] transition-colors cursor-pointer'
+                className='w-full sm:w-auto h-11 px-5 rounded bg-white hover:bg-[#edf0e9] border border-[#dce2e2] text-xs sm:text-sm font-semibold text-[#126b70] transition-colors cursor-pointer flex items-center justify-center'
               >
                 Batal
               </button>
@@ -625,7 +625,7 @@ export function ReportFormModal({
               <button
                 type='submit'
                 disabled={!isFormValid || isSubmitting}
-                className={`h-11 px-6 rounded font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs ${isFormValid && !isSubmitting
+                className={`w-full sm:w-auto h-11 px-6 rounded font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs ${isFormValid && !isSubmitting
                   ? 'bg-[#126b70] hover:bg-[#0e5458] text-white'
                   : 'bg-[#e4e9e9] text-[#718087] cursor-not-allowed opacity-80'
                   }`}
@@ -633,7 +633,7 @@ export function ReportFormModal({
                 {isSubmitting ? (
                   <>
                     <Loader2 className='w-4 h-4 animate-spin' />
-                    <span>Mengirim Laporan...</span>
+                    <span>Mengirim...</span>
                   </>
                 ) : (
                   <>
