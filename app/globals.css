@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+:root {
+  --background: #020617;
+  --foreground: #f8fafc;
+}
+
+body {
+  background-color: #020617;
+  color: #f8fafc;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Custom Leaflet Map styling overrides */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 420px !important;
+  background-color: #0b0f19 !important;
+  font-family: inherit;
+  position: relative !important;
+  display: block !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: #ffffff !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3) !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 0.75rem !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+  background-color: #ffffff !important;
+}
+
+/* Radar pulse animation for critical stations */
+@keyframes ping-slow {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.animate-radar {
+  animation: ping-slow 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Smooth running text animation (kanan ke kiri) */
+@keyframes ticker {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-ticker {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: ticker 54s linear infinite;
+  will-change: transform;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* Custom sleek dark scrollbar (menggantikan scrollbar putih tebal default browser) */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
+}
+
+/* Firefox standard scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
+}
+
+/* Utilitas untuk menyembunyikan scrollbar sepenuhnya */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Sembunyikan ikon melayang Next.js dev indicator / build badge di pojok layar */
+nextjs-portal,
+[data-nextjs-dev-tools-button],
+[data-nextjs-toast],
+#next-dev-tools,
+div[data-nextjs-static-indicator] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
