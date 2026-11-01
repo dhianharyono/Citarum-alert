@@ -163,6 +163,16 @@ export function ReportFormModal({
 
   const isFormValid = gpsLocked && caption.trim().length >= 5 && hasEvidence;
 
+  // Helper to convert File to Base64
+  const fileToBase64 = (f: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(f);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
@@ -171,28 +181,14 @@ export function ReportFormModal({
     setSubmitError(null);
 
     try {
-      let uploadedImageUrl: string | undefined = undefined;
+      let imageBase64: string | undefined = undefined;
 
-      // 1. Upload photo to Vercel Blob if provided
+      // Convert selected photo to base64 if provided
       if (evidenceType === 'photo' && file) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('district', district);
-
-        const uploadRes = await fetch('/api/verify-image', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok || !uploadData.success) {
-          throw new Error(uploadData.error || 'Gagal mengunggah foto lapangan');
-        }
-
-        uploadedImageUrl = uploadData.data?.url;
+        imageBase64 = await fileToBase64(file);
       }
 
-      // 2. Submit report
+      // Submit report to platform
       const newReportInput: CreateReportInput = {
         author: author.trim() || 'Warga Anonim',
         district,
@@ -200,7 +196,7 @@ export function ReportFormModal({
         depthCategory,
         lat: lat || -6.9922,
         lng: lng || 107.6186,
-        imageUrl: uploadedImageUrl,
+        imageBase64,
         tiktokLiveUrl:
           evidenceType === 'tiktok' && tiktokUrl.trim()
             ? tiktokUrl.trim()
@@ -212,7 +208,7 @@ export function ReportFormModal({
     } catch (err: unknown) {
       console.error(err);
       setSubmitError(
-        err instanceof Error ? err.message : 'Terjadi kesalahan sistem',
+        err instanceof Error ? err.message : 'Terjadi kesalahan sistem saat mengirim laporan',
       );
     } finally {
       setIsSubmitting(false);
