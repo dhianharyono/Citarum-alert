@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
           className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors mb-6 group"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          Kembali ke Peta Publik CitarumAlert
+          Kembali ke Peta Publik Citarum Alert
         </Link>
 
         {/* Card */}
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
               <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
                 Admin Control Center
               </h1>
-              <p className="text-xs text-slate-400">Portal Pengawasan Sistem CitarumAlert</p>
+              <p className="text-xs text-slate-400">Portal Pengawasan Sistem Citarum Alert</p>
             </div>
           </div>
 

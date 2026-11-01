@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         {
           role: 'user',
           parts: [
-            { text: 'Balas hanya 1 kata: "OK" jika Anda menerima pesan ini untuk tes koneksi CitarumAlert.' },
+            { text: 'Balas hanya 1 kata: "OK" jika Anda menerima pesan ini untuk tes koneksi Citarum Alert.' },
           ],
         },
       ],

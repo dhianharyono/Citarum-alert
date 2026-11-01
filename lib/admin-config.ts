@@ -1,6 +1,6 @@
 /**
  * Administrative configuration and runtime secrets management
- * for CitarumAlert Platform.
+ * for Citarum Alert Platform.
  */
 
 // Runtime mutable configuration (survives requests without restarting Next.js server)

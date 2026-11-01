@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
-  --foreground: #f8fafc;
+  --background: #f5f6f5;
+  --foreground: #173744;
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 body {
-  background-color: #020617;
-  color: #f8fafc;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #f5f6f5;
+  color: #173744;
+  font-family: var(--font-sans);
 }
 
 /* Custom Leaflet Map styling overrides */
@@ -16,7 +18,7 @@ body {
   width: 100% !important;
   height: 100% !important;
   min-height: 420px !important;
-  background-color: #0b0f19 !important;
+  background-color: #edf0e9 !important;
   font-family: inherit;
   position: relative !important;
   display: block !important;

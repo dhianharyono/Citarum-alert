@@ -1,522 +1,589 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
-  Navigation,
-  Sparkles,
-  AlertTriangle,
-  CheckCircle2,
   X,
-  Upload,
-  Video,
+  MapPin,
+  Waves,
   Camera,
+  UserRound,
+  LocateFixed,
+  Info,
+  Send,
+  ImagePlus,
+  Video,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
 } from 'lucide-react';
-import { WaterDepthCategory, CreateReportInput, VerificationResult } from '@/types';
+import { CreateReportInput, WaterDepthCategory } from '@/types';
 import { Button } from '@/components/ui/Button';
 
 interface ReportFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateReportInput) => Promise<void>;
+  onSubmit: (input: CreateReportInput) => Promise<void>;
 }
 
-const DISTRICT_COORDINATES: Record<string, { lat: number; lng: number }> = {
-  'Dayeuhkolot': { lat: -6.9856, lng: 107.6219 },
-  'Baleendah (Cieunteung)': { lat: -6.9980, lng: 107.6270 },
-  'Bojongsoang (Cijagra)': { lat: -6.9790, lng: 107.6360 },
-  'Kopo': { lat: -6.9450, lng: 107.5850 },
-  'Kopo Sayati': { lat: -6.9710, lng: 107.5760 },
-  'Cibaduyut': { lat: -6.9535, lng: 107.5925 },
-  'Kopo - Katapang': { lat: -6.9740, lng: 107.5750 },
-  'Majalaya (Sapan)': { lat: -7.0519, lng: 107.7583 },
-  'Rancaekek (Dangdeur)': { lat: -6.9582, lng: 107.7289 },
-  'Banjaran (Kamasan)': { lat: -7.0420, lng: 107.5910 },
-  'Margahayu (Sayuran)': { lat: -6.9620, lng: 107.5850 },
-};
+const DISTRICT_LIST = [
+  'Dayeuhkolot',
+  'Baleendah',
+  'Bojongsoang',
+  'Rancaekek',
+  'Majalaya',
+  'Katapang',
+  'Cangkuang',
+  'Banjaran',
+  'Cileunyi',
+  'Cicalengka',
+  'Margahayu',
+  'Margaasih',
+  'Kutawaringin',
+  'Soreang',
+  'Pasirjambu',
+  'Ciwidey',
+  'Rancabali',
+  'Pangalengan',
+  'Arjasari',
+  'Cimaung',
+  'Ibun',
+  'Pacet',
+  'Kertasari',
+  'Cikancung',
+  'Nagreg',
+  'Paseh',
+  'Solokanjeruk',
+  'Ciparay',
+  'Kopo',
+];
 
 export function ReportFormModal({ isOpen, onClose, onSubmit }: ReportFormModalProps) {
   const [author, setAuthor] = useState('');
-  const [district, setDistrict] = useState('Dayeuhkolot');
+  const [district, setDistrict] = useState(DISTRICT_LIST[0]);
   const [caption, setCaption] = useState('');
   const [depthCategory, setDepthCategory] = useState<WaterDepthCategory>('Selutut (20-50cm)');
-  const [evidenceTab, setEvidenceTab] = useState<'photo' | 'tiktok'>('photo');
-  const [tiktokLiveUrl, setTiktokLiveUrl] = useState('');
-  const [gpsLocked, setGpsLocked] = useState(false);
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
-  const [isVerifyingAi, setIsVerifyingAi] = useState(false);
-  const [aiResult, setAiResult] = useState<VerificationResult | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [evidenceType, setEvidenceType] = useState<'photo' | 'tiktok'>('photo');
 
-  // Validasi: Wajib mengisi caption, salah satu bukti (Foto/TikTok), dan mengunci GPS
-  const hasPhoto = Boolean(imageBase64);
-  const hasTiktok = Boolean(tiktokLiveUrl.trim());
-  const hasEvidence = hasPhoto || hasTiktok;
-  const canSubmit = caption.trim().length >= 5 && hasEvidence && gpsLocked && !isSubmitting;
+  // Evidence states
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [tiktokUrl, setTiktokUrl] = useState('');
+
+  // GPS states
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  const [gpsLocked, setGpsLocked] = useState(false);
+  const [isGpsLoading, setIsGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+
+  // Form submit state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleGPS = () => {
+  // Handle GPS lock
+  const handleLockGPS = () => {
+    setIsGpsLoading(true);
+    setGpsError(null);
+
     if (!('geolocation' in navigator)) {
-      alert('Perangkat Anda tidak mendukung fitur Geolocation.');
+      setGpsError('Browser tidak mendukung GPS');
+      setIsGpsLoading(false);
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLat(pos.coords.latitude);
+        setLng(pos.coords.longitude);
         setGpsLocked(true);
+        setIsGpsLoading(false);
       },
       (err) => {
-        console.warn('GPS failed:', err);
-        // Fallback to district coordinates
-        const defaultCoord = DISTRICT_COORDINATES[district] || { lat: -6.9856, lng: 107.6219 };
-        setCoords(defaultCoord);
-        setGpsLocked(true);
+        let msg = 'Gagal mengambil lokasi GPS';
+        if (err.code === err.PERMISSION_DENIED) {
+          msg = 'Izin lokasi ditolak. Buka pengaturan browser untuk mengizinkan GPS.';
+        }
+        setGpsError(msg);
+        setIsGpsLoading(false);
       },
-      { timeout: 7000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file maksimal 5MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string;
-      setImageBase64(base64);
-      setAiResult(null);
-
-      // Trigger automatic AI Vision check
-      setIsVerifyingAi(true);
-      try {
-        const res = await fetch('/api/verify-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            image: base64,
-            caption,
-            depthCategory,
-          }),
-        });
-        const data = await res.json();
-        if (data.success && data.data) {
-          setAiResult(data.data);
-        }
-      } catch (err) {
-        console.warn('AI verification failed:', err);
-      } finally {
-        setIsVerifyingAi(false);
+  // Handle file select
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected) {
+      if (selected.size > 5 * 1024 * 1024) {
+        alert('Ukuran file maksimal 5MB');
+        return;
       }
-    };
-    reader.readAsDataURL(file);
+      setFile(selected);
+      setPreviewUrl(URL.createObjectURL(selected));
+    }
   };
+
+  const handleRemovePhoto = () => {
+    setFile(null);
+    setPreviewUrl(null);
+  };
+
+  const hasEvidence =
+    (evidenceType === 'photo' && file !== null) ||
+    (evidenceType === 'tiktok' && tiktokUrl.trim().length > 0);
+
+  const isFormValid = gpsLocked && caption.trim().length >= 5 && hasEvidence;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!caption.trim()) return;
-
-    if (!gpsLocked || !coords) {
-      alert('Mohon klik "Kunci Titik GPS" untuk memastikan akurasi posisi genangan banjir pada peta.');
-      return;
-    }
-
-    if (!hasEvidence) {
-      alert('Mohon lampirkan salah satu bukti: Foto Lapangan atau Link Live TikTok untuk memvalidasi laporan Anda.');
-      return;
-    }
+    if (!isFormValid) return;
 
     setIsSubmitting(true);
-    try {
-      const targetCoord = coords || DISTRICT_COORDINATES[district] || {
-        lat: -6.9856,
-        lng: 107.6219,
-      };
+    setSubmitError(null);
 
-      await onSubmit({
+    try {
+      let uploadedImageUrl: string | undefined = undefined;
+
+      // 1. Upload photo to Vercel Blob if provided
+      if (evidenceType === 'photo' && file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('district', district);
+
+        const uploadRes = await fetch('/api/verify-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok || !uploadData.success) {
+          throw new Error(uploadData.error || 'Gagal mengunggah foto lapangan');
+        }
+
+        uploadedImageUrl = uploadData.data?.url;
+      }
+
+      // 2. Submit report
+      const newReportInput: CreateReportInput = {
         author: author.trim() || 'Warga Anonim',
         district,
         caption: caption.trim(),
         depthCategory,
-        lat: targetCoord.lat,
-        lng: targetCoord.lng,
-        imageBase64: imageBase64 || undefined,
-        tiktokLiveUrl: tiktokLiveUrl.trim() || undefined,
-      });
+        lat: lat || -6.9922,
+        lng: lng || 107.6186,
+        imageUrl: uploadedImageUrl,
+        tiktokLiveUrl: evidenceType === 'tiktok' && tiktokUrl.trim() ? tiktokUrl.trim() : undefined,
+      };
 
-      // Reset & close
-      setCaption('');
-      setAuthor('');
-      setTiktokLiveUrl('');
-      setImageBase64(null);
-      setAiResult(null);
-      setEvidenceTab('photo');
-      setGpsLocked(false);
+      await onSubmit(newReportInput);
       onClose();
-    } catch (err) {
-      console.error('Submit error:', err);
-      alert('Gagal mengirim laporan. Silakan coba kembali.');
+    } catch (err: unknown) {
+      console.error(err);
+      setSubmitError(err instanceof Error ? err.message : 'Terjadi kesalahan sistem');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm transition-opacity z-[9999]"
-        onClick={onClose}
-      />
-
-      {/* Modal Card */}
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-[10000] max-h-[85vh] sm:max-h-[88vh] flex flex-col my-auto">
-        {/* Modal Header (Fully Responsive on Mobile) */}
-        <div className="px-5 py-4 sm:px-6 sm:py-5 border-b border-slate-800 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-slate-100 text-sm sm:text-base leading-tight truncate">
-                Laporkan Genangan Banjir
-              </h3>
-              <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 leading-snug">
-                Laporan langsung tampil di peta & feed warga
-              </p>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-[#102530]/60 backdrop-blur-xs animate-in fade-in duration-200">
+      {/* Modal Dialog Card (Figma Desktop 920px max-width) */}
+      <div className="w-full h-full sm:h-auto sm:max-h-[92vh] sm:max-w-[920px] bg-white rounded-none sm:rounded-lg border-0 sm:border border-[#dce2e2] shadow-2xl flex flex-col overflow-hidden text-[#173744]">
+        {/* MOBILE TOP NAVIGATION (Frame 3:11142 Navigasi form 412x64) */}
+        <div className="flex sm:hidden h-14 px-4 items-center justify-between border-b border-[#dce2e2] bg-white shrink-0">
+          <span className="text-sm font-semibold text-[#172d3b]">
+            Citarum Alert / Laporan
+          </span>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition shrink-0 cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#66757c] hover:text-[#172d3b] p-1.5 rounded cursor-pointer"
           >
             <X className="w-4 h-4" />
+            <span>Tutup</span>
           </button>
         </div>
 
-        {/* Modal Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          {/* Scrollable Form Body with custom sleek scrollbar */}
-          <div className="p-5 sm:p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 sm:space-y-4.5 text-xs sm:text-sm">
-            {/* Author Name */}
-            <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                Nama Pelapor (Opsional)
-              </label>
-              <input
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Misal: Kang Dedi / Warga Bojongsoang"
-                maxLength={60}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-3.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
-              />
+        {/* DESKTOP HEADER (Frame 3:10759 Kepala form 920x111) */}
+        <div className="hidden sm:flex px-7 py-5 items-start justify-between border-b border-[#dce2e2] bg-white shrink-0">
+          <div>
+            <h2 className="text-[24px] lg:text-[26px] font-bold text-[#172d3b] tracking-tight leading-tight">
+              Laporkan Genangan Banjir
+            </h2>
+            <p className="text-xs text-[#66757c] mt-1">
+              Bagikan kondisi yang Anda lihat. Tanda * wajib diisi.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#66757c] hover:text-[#172d3b] px-2.5 py-1.5 rounded hover:bg-[#f5f6f5] transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+            <span>Tutup</span>
+          </button>
+        </div>
+
+        {/* FORM BODY (Scrollable) */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+          <div className="p-4 sm:p-7 space-y-6 flex-1">
+            {/* Mobile Title & Guide (if on mobile) */}
+            <div className="block sm:hidden">
+              <h1 className="text-xl font-bold text-[#172d3b] leading-tight">
+                Laporkan Genangan Banjir
+              </h1>
+              <p className="text-xs text-[#66757c] mt-1">
+                Bagikan kondisi yang Anda lihat. Tanda * wajib diisi.
+              </p>
             </div>
 
-            {/* District Selector & GPS Lock */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
-              <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                  Kawasan / Kecamatan
-                </label>
-                <select
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-3.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition"
-                >
-                  {Object.keys(DISTRICT_COORDINATES).map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Akurasi Posisi (GPS) <span className="text-rose-400 font-bold">*</span>
-                  </label>
-                  <span
-                    className={`text-[10px] font-semibold ${
-                      gpsLocked ? 'text-emerald-400' : 'text-amber-400'
-                    }`}
-                  >
-                    {gpsLocked ? '✓ Terkunci' : 'Wajib'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleGPS}
-                  className={`w-full py-2.5 px-3.5 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                    gpsLocked
-                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                      : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
-                  }`}
-                >
-                  <Navigation
-                    className={`w-3.5 h-3.5 ${
-                      gpsLocked ? 'text-emerald-400' : 'text-amber-400 animate-pulse'
-                    }`}
-                  />
-                  {gpsLocked ? 'GPS Terkunci' : 'Kunci Titik GPS (Wajib)'}
-                </button>
+            {/* Notice Card: Safety First (Figma Frame 3:10759 / 3:11142) */}
+            <div className="p-3.5 sm:p-4 bg-[#eaf3f1] border border-[#dce2e2] rounded flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-[#126b70] shrink-0 mt-0.5" />
+              <div className="text-xs text-[#173744] leading-relaxed">
+                <span className="font-bold sm:hidden block mb-0.5">Utamakan keselamatan</span>
+                <span>Laporkan dari tempat aman. Jangan menerobos genangan atau mengambil foto sambil berkendara.</span>
               </div>
             </div>
 
-            {/* Caption */}
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-semibold text-slate-300">
-                  Kondisi Lapangan & Akses Jalan <span className="text-rose-400">*</span>
-                </label>
-                <span className="text-[10px] text-slate-500">{caption.length}/280</span>
-              </div>
-              <textarea
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                placeholder="Contoh: Depan pabrik Kopo air mencapai knalpot motor, roda 2 putar balik..."
-                maxLength={280}
-                rows={3}
-                required
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none transition leading-relaxed"
-              />
-            </div>
+            {/* Desktop 2-Column / Mobile 1-Column Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-7 items-start">
+              {/* LEFT COLUMN: Lokasi & Kondisi Lapangan */}
+              <div className="space-y-6">
+                {/* Section 1: Lokasi Kejadian */}
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-2 text-[#172d3b] font-bold text-sm">
+                    <MapPin className="w-4 h-4 text-[#126b70]" />
+                    <span>Lokasi kejadian</span>
+                  </div>
 
-            {/* Water Depth Selector */}
-            <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-2">
-                Perkiraan Ketinggian Genangan
-              </label>
-              <div className="grid grid-cols-2 gap-2.5">
-                {(
-                  [
-                    'Mata Kaki (<20cm)',
-                    'Selutut (20-50cm)',
-                    'Sepaha (50-80cm)',
-                    'Diatas 1 Meter',
-                  ] as WaterDepthCategory[]
-                ).map((category) => (
-                  <button
-                    type="button"
-                    key={category}
-                    onClick={() => setDepthCategory(category)}
-                    className={`py-2.5 px-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition ${
-                      depthCategory === category
-                        ? 'bg-blue-600/20 border-blue-500 text-blue-300 font-bold'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </div>
+                  {/* Kecamatan Select */}
+                  <div>
+                    <label className="text-xs font-semibold text-[#172d3b] block mb-1.5">
+                      Kawasan / Kecamatan <span className="text-[#b33e35]">*</span>
+                    </label>
+                    <select
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      className="w-full h-11 bg-white border border-[#dce2e2] rounded px-3 text-xs sm:text-sm text-[#172d3b] font-medium focus:outline-none focus:border-[#126b70] cursor-pointer"
+                    >
+                      {DISTRICT_LIST.map((d) => (
+                        <option key={d} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-            {/* Evidence Tab Selector (Wajib Pilih Salah Satu: Foto ATAU Live TikTok) */}
-            <div className="space-y-2.5 pt-1">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-200 flex items-center gap-1">
-                  <span>Bukti Validasi Lapangan</span>
-                  <span className="text-rose-400 font-bold">*</span>
-                </label>
-                <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border transition ${
-                    hasEvidence
-                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                      : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
-                  }`}
-                >
-                  {hasEvidence ? '✓ Bukti Terlampir' : 'Wajib 1 Bukti'}
-                </span>
-              </div>
+                  {/* GPS Lock */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-[#172d3b]">
+                        Titik GPS <span className="text-[#b33e35]">*</span>
+                      </span>
+                      <span className={gpsLocked ? 'text-[#497665] font-semibold flex items-center gap-1' : 'text-[#66757c]'}>
+                        {gpsLocked ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#497665]" />
+                            <span>Terkunci</span>
+                          </>
+                        ) : (
+                          'Belum diambil'
+                        )}
+                      </span>
+                    </div>
 
-              {/* Tab Buttons */}
-              <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setEvidenceTab('photo')}
-                  className={`py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                    evidenceTab === 'photo'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <Camera className="w-3.5 h-3.5 shrink-0" />
-                  <span>Foto Lapangan</span>
-                  {hasPhoto && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setEvidenceTab('tiktok')}
-                  className={`py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                    evidenceTab === 'tiktok'
-                      ? 'bg-rose-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <Video className="w-3.5 h-3.5 shrink-0" />
-                  <span>Live TikTok</span>
-                  {hasTiktok && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                  )}
-                </button>
-              </div>
-
-              {/* Tab 1 Content: Foto Bukti Lapangan */}
-              {evidenceTab === 'photo' && (
-                <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2.5">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
-
-                  {!imageBase64 ? (
                     <button
                       type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full py-5 border-2 border-dashed border-slate-800 hover:border-slate-700 bg-slate-900/50 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 transition cursor-pointer"
+                      onClick={handleLockGPS}
+                      disabled={isGpsLoading}
+                      className={`w-full h-11 px-4 rounded border text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${
+                        gpsLocked
+                          ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70]'
+                          : 'bg-white hover:bg-[#f5f6f5] border-[#dce2e2] text-[#126b70]'
+                      }`}
                     >
-                      <Upload className="w-5 h-5 text-blue-400" />
-                      <span className="text-xs font-medium">Klik untuk unggah foto genangan (Maks 5MB)</span>
-                      <span className="text-[10px] text-slate-500">
-                        Foto diverifikasi otomatis dengan Google Gemini Vision AI
-                      </span>
+                      {isGpsLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-[#126b70]" />
+                          <span>Mendeteksi Satelit GPS...</span>
+                        </>
+                      ) : (
+                        <>
+                          <LocateFixed className="w-4 h-4" />
+                          <span>{gpsLocked ? 'Kunci Ulang Titik GPS' : 'Kunci Titik GPS'}</span>
+                        </>
+                      )}
                     </button>
-                  ) : (
-                    <div className="space-y-2.5">
-                      <div className="relative rounded-xl overflow-hidden border border-slate-800 max-h-44 bg-slate-950">
-                        <img src={imageBase64} alt="Preview Bukti" className="w-full h-full object-cover" />
+
+                    <p className="text-[11px] text-[#66757c] leading-relaxed">
+                      Izinkan akses lokasi untuk mengambil titik Anda. Pilihan kecamatan tidak menggantikan GPS.
+                    </p>
+                    {gpsError && (
+                      <p className="text-[11px] text-[#b33e35] font-medium leading-relaxed">
+                        {gpsError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-b border-[#dce2e2]" />
+
+                {/* Section 2: Kondisi Lapangan */}
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-2 text-[#172d3b] font-bold text-sm">
+                    <Waves className="w-4 h-4 text-[#126b70]" />
+                    <span>Kondisi lapangan</span>
+                  </div>
+
+                  {/* Caption Textarea */}
+                  <div>
+                    <label className="text-xs font-semibold text-[#172d3b] block mb-1.5">
+                      Kondisi Lapangan &amp; Akses Jalan <span className="text-[#b33e35]">*</span>
+                    </label>
+                    <textarea
+                      value={caption}
+                      onChange={(e) => setCaption(e.target.value)}
+                      placeholder="Contoh: Depan pabrik Kopo air mencapai knalpot motor, roda 2 putar balik..."
+                      maxLength={280}
+                      rows={3}
+                      className="w-full bg-white border border-[#dce2e2] rounded p-3 text-xs sm:text-sm text-[#172d3b] placeholder-[#8a969a] focus:outline-none focus:border-[#126b70] resize-none leading-relaxed"
+                    />
+                    <div className="flex items-center justify-between mt-1 text-[11px] text-[#66757c]">
+                      <span>Minimal 5 karakter</span>
+                      <span>{caption.length} / 280</span>
+                    </div>
+                  </div>
+
+                  {/* Water Depth Selector */}
+                  <div>
+                    <label className="text-xs font-semibold text-[#172d3b] block mb-1.5">
+                      Perkiraan ketinggian <span className="text-[#b33e35]">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(
+                        [
+                          'Mata Kaki (<20cm)',
+                          'Selutut (20-50cm)',
+                          'Sepaha (50-80cm)',
+                          'Diatas 1 Meter',
+                        ] as WaterDepthCategory[]
+                      ).map((category) => (
                         <button
                           type="button"
-                          onClick={() => {
-                            setImageBase64(null);
-                            setAiResult(null);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 bg-slate-900/80 hover:bg-rose-600 text-white rounded-lg transition cursor-pointer"
-                          title="Hapus foto"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      {/* AI Verification Status Card */}
-                      {isVerifyingAi ? (
-                        <div className="p-3 bg-blue-950/30 border border-blue-500/20 rounded-xl flex items-center gap-2 text-blue-300 text-xs">
-                          <Sparkles className="w-4 h-4 animate-spin text-blue-400 shrink-0" />
-                          <span>Menganalisis foto dengan Gemini Flash AI...</span>
-                        </div>
-                      ) : aiResult ? (
-                        <div
-                          className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs ${
-                            aiResult.isFlood
-                              ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300'
-                              : 'bg-amber-950/20 border-amber-500/30 text-amber-300'
+                          key={category}
+                          onClick={() => setDepthCategory(category)}
+                          className={`p-2.5 rounded border text-left text-xs font-medium transition cursor-pointer ${
+                            depthCategory === category
+                              ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70] font-bold'
+                              : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b]'
                           }`}
                         >
-                          {aiResult.isFlood ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                          ) : (
-                            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                          )}
-                          <div>
-                            <div className="font-bold flex items-center gap-1.5">
-                              <span>
-                                {aiResult.isFlood ? 'Foto Terverifikasi AI' : 'Peringatan AI'}
-                              </span>
-                              <span className="text-[10px] bg-slate-800 px-1.5 py-0.2 rounded text-slate-300">
-                                {Math.round(aiResult.confidence * 100)}% Match
-                              </span>
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-[#66757c] mt-1.5 leading-relaxed">
+                      Perkirakan dari tempat aman; jangan masuk ke genangan untuk mengukur.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN: Bukti & Identitas */}
+              <div className="space-y-6">
+                {/* Section 3: Bukti Lapangan */}
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-2 text-[#172d3b] font-bold text-sm">
+                    <Camera className="w-4 h-4 text-[#126b70]" />
+                    <span>Bukti lapangan</span>
+                  </div>
+
+                  <p className="text-xs text-[#172d3b] leading-relaxed">
+                    Tambahkan minimal satu bukti: foto atau URL Live TikTok. Tidak harus keduanya. <span className="text-[#b33e35]">*</span>
+                  </p>
+
+                  {/* Tab Selector */}
+                  <div className="grid grid-cols-2 rounded border border-[#dce2e2] p-0.5 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setEvidenceType('photo')}
+                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${
+                        evidenceType === 'photo'
+                          ? 'bg-[#eaf3f1] text-[#126b70]'
+                          : 'text-[#66757c] hover:text-[#172d3b]'
+                      }`}
+                    >
+                      Foto Lapangan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEvidenceType('tiktok')}
+                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${
+                        evidenceType === 'tiktok'
+                          ? 'bg-[#eaf3f1] text-[#126b70]'
+                          : 'text-[#66757c] hover:text-[#172d3b]'
+                      }`}
+                    >
+                      URL Live TikTok
+                    </button>
+                  </div>
+
+                  {/* Tab Content: Photo Upload */}
+                  {evidenceType === 'photo' && (
+                    <div className="space-y-2">
+                      {previewUrl ? (
+                        <div className="relative border border-[#dce2e2] rounded overflow-hidden bg-[#f8faf9] p-2 flex items-center gap-3">
+                          <img
+                            src={previewUrl}
+                            alt="Bukti foto genangan"
+                            className="w-16 h-16 object-cover rounded border border-[#dce2e2]"
+                          />
+                          <div className="flex-1 min-w-0 text-xs">
+                            <div className="font-semibold text-[#172d3b] truncate">
+                              {file?.name}
                             </div>
-                            <p className="text-[11px] text-slate-300 mt-1 leading-snug">
-                              {aiResult.explanation}
-                            </p>
+                            <div className="text-[11px] text-[#66757c]">
+                              {((file?.size || 0) / (1024 * 1024)).toFixed(2)} MB • Siap diunggah
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleRemovePhoto}
+                              className="text-[11px] font-semibold text-[#b33e35] hover:underline mt-1 block cursor-pointer"
+                            >
+                              Ganti Foto
+                            </button>
                           </div>
                         </div>
-                      ) : null}
+                      ) : (
+                        <label className="border-2 border-dashed border-[#dce2e2] hover:border-[#126b70] rounded-md p-6 flex flex-col items-center justify-center text-center cursor-pointer bg-[#fbfcfb] transition">
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleFileChange}
+                            className="hidden"
+                          />
+                          <ImagePlus className="w-7 h-7 text-[#126b70] mb-2" />
+                          <span className="h-9 px-4 rounded bg-white border border-[#dce2e2] text-xs font-semibold text-[#126b70] flex items-center justify-center mb-1.5 shadow-2xs">
+                            Pilih foto
+                          </span>
+                          <span className="text-[11px] text-[#66757c]">
+                            Belum ada foto • file gambar maks. 5 MB
+                          </span>
+                        </label>
+                      )}
+
+                      <p className="text-[11px] text-[#66757c] leading-relaxed">
+                        Foto dapat dianalisis otomatis oleh AI. Hasilnya bukan verifikasi resmi BPBD.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Tab Content: TikTok Live */}
+                  {evidenceType === 'tiktok' && (
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <input
+                          type="url"
+                          value={tiktokUrl}
+                          onChange={(e) => setTiktokUrl(e.target.value)}
+                          placeholder="https://www.tiktok.com/@username/live/..."
+                          className="w-full h-11 bg-white border border-[#dce2e2] rounded px-3 text-xs sm:text-sm text-[#172d3b] placeholder-[#8a969a] focus:outline-none focus:border-[#126b70]"
+                        />
+                      </div>
+                      <p className="text-[11px] text-[#66757c] leading-relaxed">
+                        Tempel tautan siaran langsung TikTok warga saat ini di lokasi genangan.
+                      </p>
                     </div>
                   )}
                 </div>
-              )}
 
-              {/* Tab 2 Content: Link Live TikTok */}
-              {evidenceTab === 'tiktok' && (
-                <div className="p-3.5 bg-gradient-to-r from-rose-950/30 via-slate-950 to-slate-950 border border-rose-500/30 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between gap-1.5 flex-wrap">
-                    <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5 min-w-0">
-                      <span className="flex h-2 w-2 relative shrink-0">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                      </span>
-                      <Video className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                      <span className="truncate sm:whitespace-normal">URL Siaran Langsung TikTok</span>
-                    </label>
-                    <span className="text-[9px] font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap">
-                      Live Stream
-                    </span>
+                {/* Divider */}
+                <div className="border-b border-[#dce2e2]" />
+
+                {/* Section 4: Identitas Pelapor */}
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-2 text-[#172d3b] font-bold text-sm">
+                    <UserRound className="w-4 h-4 text-[#126b70]" />
+                    <span>Identitas pelapor</span>
                   </div>
-                  <input
-                    type="text"
-                    value={tiktokLiveUrl}
-                    onChange={(e) => setTiktokLiveUrl(e.target.value)}
-                    placeholder="Contoh: https://vt.tiktok.com/xxxx/ atau tiktok.com/@akun/live"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-3.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-rose-500/70 transition"
-                  />
-                  <p className="text-[10px] text-slate-400 leading-tight">
-                    Tautan ini akan langsung muncul di peta &amp; feed warga agar komuter lain dapat memantau kondisi arus air secara langsung.
-                  </p>
-                </div>
-              )}
 
-              {/* Hint if neither evidence is provided */}
-              {!hasEvidence && (
-                <p className="text-xs text-amber-400/90 flex items-center gap-1.5 pt-1 leading-tight">
-                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                  <span>Wajib lampirkan 1 bukti (Foto atau Live TikTok).</span>
-                </p>
-              )}
+                  <div>
+                    <label className="text-xs font-semibold text-[#172d3b] block mb-1.5">
+                      Nama Pelapor (opsional)
+                    </label>
+                    <input
+                      type="text"
+                      value={author}
+                      onChange={(e) => setAuthor(e.target.value)}
+                      placeholder="Nama Anda"
+                      maxLength={60}
+                      className="w-full h-11 bg-white border border-[#dce2e2] rounded px-3 text-xs sm:text-sm text-[#172d3b] placeholder-[#8a969a] focus:outline-none focus:border-[#126b70]"
+                    />
+                    <p className="text-[11px] text-[#66757c] mt-1">
+                      Maks. 60 karakter. Jika kosong, tampil sebagai Warga Anonim.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Fixed Modal Footer Action */}
-          <div className="px-5 py-3.5 sm:px-6 sm:py-4 border-t border-slate-800 bg-slate-900/95 flex items-center justify-end gap-3 shrink-0">
-            <Button type="button" variant="ghost" size="sm" onClick={onClose} className="px-4 py-2">
-              Batal
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              isLoading={isSubmitting}
-              disabled={!canSubmit}
-              className="px-5 py-2.5 shadow-md shadow-blue-600/30"
-              title={
-                !gpsLocked
-                  ? 'Wajib mengunci titik koordinat GPS lokasi terlebih dahulu'
-                  : !hasEvidence
-                  ? 'Wajib melampirkan salah satu bukti (Foto atau Link Live TikTok)'
-                  : undefined
-              }
-            >
-              Kirim Laporan Siaga
-            </Button>
+          {/* FOOTER ACTION (Frame 3:10759 / 3:11142 Pengiriman laporan) */}
+          <div className="p-4 sm:px-7 sm:py-5 border-t border-[#dce2e2] bg-[#f5f6f5] space-y-3.5 shrink-0">
+            {/* Status / Incomplete Notice */}
+            {!isFormValid && (
+              <div className="flex items-center gap-2 text-xs text-[#66757c]">
+                <Info className="w-4 h-4 text-[#66757c] shrink-0" />
+                <span className="leading-snug">
+                  Belum bisa dikirim. Kunci GPS, isi deskripsi (min. 5 karakter), dan tambahkan foto atau URL Live TikTok.
+                </span>
+              </div>
+            )}
+
+            {submitError && (
+              <div className="flex items-center gap-2 text-xs text-[#b33e35] bg-[#fbeeeb] p-2.5 rounded border border-[#f5c6cb]">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-[#b33e35]" />
+                <span className="leading-snug font-medium">{submitError}</span>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="h-11 px-5 rounded bg-white hover:bg-[#edf0e9] border border-[#dce2e2] text-xs sm:text-sm font-semibold text-[#126b70] transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+
+              <button
+                type="submit"
+                disabled={!isFormValid || isSubmitting}
+                className={`h-11 px-6 rounded font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs ${
+                  isFormValid && !isSubmitting
+                    ? 'bg-[#126b70] hover:bg-[#0e5458] text-white'
+                    : 'bg-[#e4e9e9] text-[#718087] cursor-not-allowed opacity-80'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Mengirim Laporan...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>Kirim Laporan</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>
     </div>
   );
 }
-

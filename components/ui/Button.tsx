@@ -18,20 +18,20 @@ export function Button({
 }: ButtonProps) {
   const variantStyles = {
     primary:
-      'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/25 border border-blue-500/30 active:scale-[0.98]',
+      'bg-[#126b70] hover:bg-[#0e5458] text-white shadow-xs border border-[#126b70] active:scale-[0.98]',
     secondary:
-      'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 active:scale-[0.98]',
+      'bg-white hover:bg-slate-50 text-[#173744] border border-[#dce2e2] shadow-xs active:scale-[0.98]',
     outline:
-      'bg-transparent hover:bg-slate-800/60 text-slate-300 border border-slate-700 hover:text-white',
+      'bg-transparent hover:bg-slate-100 text-[#173744] border border-[#dce2e2]',
     danger:
-      'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 border border-rose-500/30 active:scale-[0.98]',
-    ghost: 'bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-100',
+      'bg-[#b33e35] hover:bg-[#97322a] text-white shadow-xs border border-[#b33e35] active:scale-[0.98]',
+    ghost: 'bg-transparent hover:bg-slate-100 text-[#66757c] hover:text-[#173744]',
   };
 
   const sizeStyles = {
-    sm: 'text-xs px-2.5 py-1.5 rounded-lg font-medium gap-1.5',
-    md: 'text-xs sm:text-sm px-3.5 py-2 rounded-xl font-medium gap-2',
-    lg: 'text-sm sm:text-base px-4 py-2.5 rounded-xl font-semibold gap-2.5',
+    sm: 'text-xs px-3 py-1.5 rounded-md font-medium gap-1.5',
+    md: 'text-xs sm:text-sm px-3.5 py-2 rounded-md font-medium gap-2',
+    lg: 'text-sm sm:text-base px-4 py-2.5 rounded-md font-semibold gap-2.5',
   };
 
   return (

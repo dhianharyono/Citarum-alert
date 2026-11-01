@@ -1,4 +1,4 @@
-# 🌊 CitarumAlert (Pantau Banjir & Siaga Warga Kab. Bandung)
+# 🌊 Citarum Alert (Pantau Banjir & Siaga Warga Kab. Bandung)
 
 Platform *live public dashboard* & *crowdsourcing* tanggap banjir Kabupaten Bandung yang menggabungkan sensor sungai resmi (**AWLR BBWS Citarum & BPBD**) dan laporan lapangan warga terverifikasi **Google Gemini Flash Vision AI**.
 

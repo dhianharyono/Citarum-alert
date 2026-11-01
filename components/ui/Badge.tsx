@@ -14,18 +14,18 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const variantStyles = {
-    normal: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    waspada: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
-    siaga: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    awas: 'bg-rose-500/15 text-rose-400 border-rose-500/30 animate-pulse',
-    blue: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    neutral: 'bg-slate-800 text-slate-300 border-slate-700',
-    success: 'bg-teal-500/15 text-teal-300 border-teal-500/30',
+    normal: 'bg-[#eaf3f1] text-[#497665] border-[#c3e6cb]/80',
+    waspada: 'bg-[#fef9e7] text-[#927626] border-[#fde8a0]/80',
+    siaga: 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]/80',
+    awas: 'bg-[#fbeeeb] text-[#b33e35] border-[#f5c6cb]/80',
+    blue: 'bg-[#eaf3f1] text-[#126b70] border-[#dce2e2]',
+    neutral: 'bg-[#edf0e9] text-[#66757c] border-[#dce2e2]',
+    success: 'bg-[#eaf3f1] text-[#497665] border-[#c3e6cb]/80',
   };
 
   const sizeStyles = {
-    sm: 'text-[11px] px-2 py-0.5 rounded-full border font-medium',
-    md: 'text-xs px-2.5 py-1 rounded-lg border font-semibold',
+    sm: 'text-[11px] px-2 py-0.5 rounded border font-semibold tracking-wide',
+    md: 'text-xs px-2.5 py-0.5 rounded border font-semibold tracking-wide',
   };
 
   return (

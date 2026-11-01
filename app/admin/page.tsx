@@ -318,7 +318,7 @@ export default function AdminDashboardPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-white tracking-tight">CitarumAlert</span>
+                <span className="font-bold text-white tracking-tight">Citarum Alert</span>
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
                   Admin Panel
                 </span>

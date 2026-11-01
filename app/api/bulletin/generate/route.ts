@@ -17,7 +17,7 @@ export async function POST() {
     try {
       const ai = new GoogleGenAI({ apiKey });
       const prompt = `
-Anda adalah Editor Informasi Kebencanaan & Transportasi resmi CitarumAlert untuk seluruh wilayah Kabupaten Bandung, Jawa Barat.
+Anda adalah Editor Informasi Kebencanaan & Transportasi resmi Citarum Alert untuk seluruh wilayah Kabupaten Bandung, Jawa Barat.
 Buat buletin laporan situasi komprehensif se-Kabupaten Bandung untuk periode November 2026 berdasarkan peringatan BPBD Kab. Bandung, BMKG Jabar, dan pantauan TMC Lalu Lintas.
 
 Cakupan harus mencakup 4 zona utama:

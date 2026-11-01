@@ -2,27 +2,25 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import {
-  Droplets,
-  RefreshCw,
-  PlusCircle,
-  Clock,
-  Sparkles,
-} from 'lucide-react';
+import { ArrowRight, Plus } from 'lucide-react';
 import { AWLRStation, FloodReport, CreateReportInput } from '@/types';
-import { TelemetryPanel } from '@/components/dashboard/TelemetryPanel';
-import { SituationalBriefing } from '@/components/dashboard/SituationalBriefing';
-import { CommunityFeed } from '@/components/dashboard/CommunityFeed';
+import { FigmaNavbar } from '@/components/dashboard/FigmaNavbar';
+import { FigmaSummaryBar } from '@/components/dashboard/FigmaSummaryBar';
+import { FigmaSensorPanel } from '@/components/dashboard/FigmaSensorPanel';
+import { FigmaBulletin } from '@/components/dashboard/FigmaBulletin';
+import { FigmaCitizenPanel } from '@/components/dashboard/FigmaCitizenPanel';
+import { FigmaBulletinFullPage } from '@/components/dashboard/FigmaBulletinFullPage';
+import { FigmaCitizenFullPage } from '@/components/dashboard/FigmaCitizenFullPage';
+import { FigmaFooter } from '@/components/dashboard/FigmaFooter';
 import { ReportFormModal } from '@/components/dashboard/ReportFormModal';
-import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 
 // Dynamic import with SSR disabled for Leaflet container
 const FloodMap = dynamic(() => import('@/components/map/FloodMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[400px] sm:h-[480px] bg-slate-900 border border-slate-800 rounded-2xl animate-pulse flex items-center justify-center text-slate-500 text-xs">
-      Memuat Peta Spasial CitarumAlert...
+    <div className="w-full h-[360px] sm:h-[462px] bg-white border border-[#dce2e2] rounded-md animate-pulse flex items-center justify-center text-[#66757c] text-xs">
+      Memuat Peta Spasial Citarum Alert...
     </div>
   ),
 });
@@ -36,6 +34,7 @@ export default function DashboardPage() {
   const [showRefreshToast, setShowRefreshToast] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [userVotes, setUserVotes] = useState<Record<string, 'upvote' | 'downvote'>>({});
+  const [activeTab, setActiveTab] = useState<'pemantauan' | 'buletin' | 'laporan'>('pemantauan');
 
   // Muat status voting yang tersimpan di localStorage agar user tidak bisa spam
   useEffect(() => {
@@ -75,7 +74,6 @@ export default function DashboardPage() {
     } catch (err) {
       console.warn('Manual refresh failed:', err);
     } finally {
-      // Ensure visible feedback of at least 700ms so user clearly perceives the loading
       const elapsed = Date.now() - start;
       if (elapsed < 700) {
         await new Promise((resolve) => setTimeout(resolve, 700 - elapsed));
@@ -151,7 +149,6 @@ export default function DashboardPage() {
     let nextVotes: Record<string, 'upvote' | 'downvote'>;
 
     if (currentVote === type) {
-      // User membatalkan vote (unvote)
       action = type === 'upvote' ? 'un-upvote' : 'un-downvote';
       const updated = { ...userVotes };
       delete updated[id];
@@ -168,7 +165,6 @@ export default function DashboardPage() {
         })
       );
     } else if (currentVote) {
-      // User berpindah vote (misal dari konfirmasi ke surut)
       action = type === 'upvote' ? 'switch-to-upvote' : 'switch-to-downvote';
       nextVotes = { ...userVotes, [id]: type };
 
@@ -191,7 +187,6 @@ export default function DashboardPage() {
         })
       );
     } else {
-      // Vote pertama kali
       action = type;
       nextVotes = { ...userVotes, [id]: type };
 
@@ -228,9 +223,16 @@ export default function DashboardPage() {
   const handleUpvote = (id: string) => handleVote(id, 'upvote');
   const handleDownvote = (id: string) => handleVote(id, 'downvote');
 
+  const handleTabChange = (tab: 'pemantauan' | 'buletin' | 'laporan') => {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
-      {/* Global Floating Toast Alert (Simple & Informatif di Mobile/Desktop) */}
+    <div className="min-h-screen bg-[#f5f6f5] text-[#173744] flex flex-col font-sans selection:bg-[#126b70] selection:text-white">
+      {/* Global Floating Toast Alert */}
       {showRefreshToast && (
         <Alert
           floating
@@ -240,184 +242,166 @@ export default function DashboardPage() {
           autoClose={2500}
           className="justify-between"
         >
-          <span className="font-semibold text-emerald-200">
+          <span className="font-semibold text-[#497665]">
             Data telemetri &amp; laporan warga diperbarui
           </span>
         </Alert>
       )}
 
-      {/* Inline styles for guaranteed smooth 60fps marquee across all browsers */}
-      <style>{`
-        @keyframes citarumMarquee {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-        .citarum-marquee-track {
-          display: inline-flex !important;
-          white-space: nowrap !important;
-          animation: citarumMarquee 54s linear infinite !important;
-          will-change: transform;
-        }
-        .citarum-marquee-track:hover {
-          animation-play-state: paused !important;
-        }
-      `}</style>
+      {/* Navbar matching Figma 1:1 */}
+      <FigmaNavbar
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        onOpenReportModal={() => setIsModalOpen(true)}
+      />
 
-      {/* Top Warning Banner / Live Running Text Ticker (Oranye / Amber untuk SIAGA) */}
-      <div className="bg-amber-950/85 border-b border-amber-900/70 py-1.5 px-3 flex items-center overflow-hidden relative text-[10px] sm:text-[11px] text-amber-200">
-        <div className="flex items-center gap-1.5 shrink-0 bg-amber-950/95 pr-2.5 z-10 font-bold uppercase tracking-wider text-amber-400 border-r border-amber-800/70 shadow-md">
-          <span className="flex h-2 w-2 relative shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-          </span>
-          <span className="whitespace-nowrap">Siaga Banjir</span>
-        </div>
+      {/* Main Container */}
+      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-5 sm:py-7 space-y-6">
+        {/* VIEW 1: TAB PEMANTAUAN (Dashboard Frame 3:1621 & Frame 3:11243) */}
+        {activeTab === 'pemantauan' && (
+          <>
+            {/* DESKTOP DASHBOARD (Figma Frame 3:1621, 1440px wide) */}
+            <div className="hidden md:flex flex-col gap-6">
+              <FigmaSummaryBar
+                stations={stations}
+                isRefreshing={isRefreshing}
+                onRefresh={handleManualRefresh}
+                lastUpdated={lastUpdated}
+              />
 
-        <div className="overflow-hidden w-full relative pl-2 flex-1">
-          <div className="citarum-marquee-track text-amber-200 font-medium items-center">
-            <span>Sungai Citarum Dayeuhkolot: TMA 685 cm (Status SIAGA)</span>
-            <span className="mx-3 text-amber-500/80 font-bold select-none">|</span>
-            <span>Jembatan Cikeruh: TMA 225 cm (Status AWAS)</span>
-            <span className="mx-3 text-amber-500/80 font-bold select-none">|</span>
-            <span>Jembatan Bojongsoang: TMA 480 cm (Status SIAGA)</span>
-            <span className="mx-3 text-amber-500/80 font-bold select-none">|</span>
-            <span>Himbauan: Pengendara motor waspada genangan di koridor Kopo, Dayeuhkolot, Cibaduyut &amp; Baleendah</span>
-            <span className="mx-3 text-amber-500/80 font-bold select-none">|</span>
-            <span>Pantau debit air resmi dan kirim laporan lapangan terkini melalui tombol Laporkan Banjir</span>
-          </div>
-        </div>
+              {/* Row 1: Map (Left) + River Sensors (Right) */}
+              <div className="grid grid-cols-12 gap-6 items-stretch">
+                <div className="col-span-8 flex flex-col">
+                  <FloodMap
+                    stations={stations}
+                    reports={reports}
+                    selectedReport={selectedReport}
+                    onSelectReport={(rep) => setSelectedReport(rep)}
+                  />
+                </div>
 
-        <div className="hidden lg:flex items-center gap-1 text-[10px] text-amber-400/80 shrink-0 bg-amber-950/95 pl-2.5 z-10 border-l border-amber-800/70 shadow-md">
-          <Clock className="w-3 h-3 shrink-0 text-amber-400" /> {lastUpdated || 'Baru saja'}
-        </div>
-      </div>
+                <div className="col-span-4 flex flex-col">
+                  <FigmaSensorPanel stations={stations} />
+                </div>
+              </div>
 
-      {/* Main Header (Responsive on Mobile) */}
-      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="bg-gradient-to-tr from-blue-600 to-cyan-500 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-white shadow-lg shadow-blue-500/20 shrink-0">
-            <Droplets className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <h1 className="font-extrabold text-sm sm:text-lg tracking-tight text-white shrink-0">
-                CitarumAlert
-              </h1>
-              <span className="hidden sm:inline-flex bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                Kab. Bandung
-              </span>
+              {/* Row 2: Bulletin (Left) + Citizen Panel (Right) */}
+              <div className="grid grid-cols-12 gap-6 items-start">
+                <div className="col-span-8">
+                  <FigmaBulletin lastUpdated={lastUpdated} />
+                </div>
+
+                <div className="col-span-4">
+                  <FigmaCitizenPanel
+                    reports={reports}
+                    userVotes={userVotes}
+                    onUpvote={handleUpvote}
+                    onDownvote={handleDownvote}
+                    onOpenReportModal={() => setIsModalOpen(true)}
+                    onSelectReport={(rep) => setSelectedReport(rep)}
+                  />
+                </div>
+              </div>
             </div>
-            <p className="text-[11px] text-slate-400 hidden md:block truncate">
-              Telemetri Sensor Sungai Resmi & Crowdsourcing Siaga Warga
-            </p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <button
-            onClick={handleManualRefresh}
-            disabled={isRefreshing}
-            title="Muat ulang data telemetri"
-            className="px-2.5 py-1.5 sm:px-3 sm:py-2 text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 rounded-xl border border-slate-700 transition flex items-center gap-1.5 text-xs font-medium shrink-0 disabled:opacity-80 shadow-sm cursor-pointer"
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400 ${isRefreshing ? 'animate-spin' : ''
-                }`}
-            />
-            <span className="hidden xs:inline">{isRefreshing ? 'Memuat...' : 'Refresh'}</span>
-          </button>
+            {/* MOBILE DASHBOARD (Figma Frame 3:11243, 412px wide) */}
+            <div className="flex md:hidden flex-col gap-5">
+              <FigmaSummaryBar
+                stations={stations}
+                isRefreshing={isRefreshing}
+                onRefresh={handleManualRefresh}
+                lastUpdated={lastUpdated}
+              />
 
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsModalOpen(true)}
-            className="shadow-lg shadow-blue-600/20 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs shrink-0"
-          >
-            <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span className="hidden sm:inline">Laporkan Banjir</span>
-            <span className="sm:hidden">Lapor</span>
-          </Button>
-        </div>
-      </header>
+              <div className="w-full">
+                <FloodMap
+                  stations={stations}
+                  reports={reports}
+                  selectedReport={selectedReport}
+                  onSelectReport={(rep) => setSelectedReport(rep)}
+                />
+              </div>
 
-      {/* Main Workspace Grid */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
-        {/* Left Column (8 cols): Interactive Spatial Map & Telemetry Dashboard */}
-        <div className="lg:col-span-8 space-y-5 sm:space-y-6">
-          {/* Spatial Flood Map */}
-          <section>
-            <FloodMap
-              stations={stations}
-              reports={reports}
-              selectedReport={selectedReport}
-              onSelectReport={(rep) => setSelectedReport(rep)}
-            />
-          </section>
+              <div className="w-full">
+                <FigmaSensorPanel stations={stations} />
+              </div>
 
-          {/* Telemetry Sensor AWLR Panel */}
-          <section>
-            <TelemetryPanel stations={stations} />
-          </section>
+              {/* Quick Navigation Cards */}
+              <div className="w-full bg-white border border-[#dce2e2] rounded-md divide-y divide-[#dce2e2] shadow-xs overflow-hidden">
+                <button
+                  onClick={() => handleTabChange('buletin')}
+                  className="w-full p-4 flex items-center justify-between text-left hover:bg-[#f8faf9] transition-colors cursor-pointer group"
+                >
+                  <div>
+                    <h3 className="text-[15px] font-bold text-[#173744]">
+                      Buletin wilayah
+                    </h3>
+                    <p className="text-xs text-[#66757c] mt-0.5">
+                      Ringkasan 4 wilayah • {lastUpdated || '1 Nov 2026'}
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#66757c] group-hover:text-[#126b70] transition-colors" />
+                </button>
 
-          {/* Buletin Situasi & Pantauan Lapangan Se-Kabupaten Bandung */}
-          <section>
-            <SituationalBriefing />
-          </section>
-        </div>
+                <button
+                  onClick={() => handleTabChange('laporan')}
+                  className="w-full p-4 flex items-center justify-between text-left hover:bg-[#f8faf9] transition-colors cursor-pointer group"
+                >
+                  <div>
+                    <h3 className="text-[15px] font-bold text-[#173744]">
+                      Laporan warga
+                    </h3>
+                    <p className="text-xs text-[#66757c] mt-0.5">
+                      {reports.length} laporan • informasi komunitas
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#66757c] group-hover:text-[#126b70] transition-colors" />
+                </button>
+              </div>
 
-        {/* Right Column (4 cols): Citizen Micro-Report Stream & Report Action */}
-        <div className="lg:col-span-4 space-y-4 sm:space-y-5">
-          {/* Quick Action Card */}
-          <div className="p-3.5 sm:p-4 bg-gradient-to-br from-blue-950/40 via-slate-900 to-slate-900 border border-blue-500/20 rounded-2xl space-y-2.5 sm:space-y-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-400 shrink-0" />
-              <h3 className="font-bold text-xs text-blue-200">Bantu Sesama Komuter</h3>
+              {/* Mobile CTA */}
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full h-11 bg-[#126b70] hover:bg-[#0e5458] text-white rounded-md font-medium text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Laporkan Banjir</span>
+              </button>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Kirim info genangan jalan, akses motor mogok, atau luapan tanggul di sekitar Anda.
-              Didukung verifikasi visual Gemini AI.
-            </p>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsModalOpen(true)}
-              className="w-full text-xs"
-            >
-              <PlusCircle className="w-3.5 h-3.5 shrink-0" />
-              Buat Laporan Lapangan
-            </Button>
-          </div>
+          </>
+        )}
 
-          {/* Real-time Community Feed */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-3.5 sm:p-4">
-            <CommunityFeed
-              reports={reports}
-              userVotes={userVotes}
-              onUpvote={handleUpvote}
-              onDownvote={handleDownvote}
-              onSelectReport={(rep) => setSelectedReport(rep)}
-            />
-          </div>
-        </div>
+        {/* VIEW 2: TAB BULETIN WILAYAH (Full Page Frame 3:11384 & Frame 3:11500) */}
+        {activeTab === 'buletin' && (
+          <FigmaBulletinFullPage
+            lastUpdated={lastUpdated}
+            onOpenReportModal={() => setIsModalOpen(true)}
+          />
+        )}
+
+        {/* VIEW 3: TAB LAPORAN WARGA (Full Page Frame 3:11612 & Frame 3:11691) */}
+        {activeTab === 'laporan' && (
+          <FigmaCitizenFullPage
+            reports={reports}
+            userVotes={userVotes}
+            onUpvote={handleUpvote}
+            onDownvote={handleDownvote}
+            onOpenReportModal={() => setIsModalOpen(true)}
+            onSelectReport={(rep) => setSelectedReport(rep)}
+            lastUpdated={lastUpdated}
+          />
+        )}
       </main>
 
-      {/* Report Form Modal with GPS & AI Verification */}
+      {/* Footer matching Figma */}
+      <FigmaFooter />
+
+      {/* Report Form Modal (Frame 3:10759 Desktop 920px & Frame 3:11142 Mobile) */}
       <ReportFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateReport}
       />
-
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-4 px-4 sm:px-6 text-center text-xs text-slate-500">
-        <p>
-          CitarumAlert Platform • Integrasi Data Hidrologi BBWS Citarum, BPBD Kab. Bandung &amp; Partisipasi Warga.
-        </p>
-      </footer>
     </div>
   );
 }

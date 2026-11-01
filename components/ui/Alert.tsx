@@ -49,34 +49,34 @@ export function Alert({
   // Variant color definitions
   const variantStyles: Record<AlertVariant, { container: string; icon: string; title: string }> = {
     success: {
-      container: 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200 shadow-emerald-950/50',
-      icon: 'text-emerald-400',
-      title: 'text-emerald-300 font-bold',
+      container: 'bg-[#eaf3f1] border-[#c3e6cb] text-[#497665] shadow-xs',
+      icon: 'text-[#497665]',
+      title: 'text-[#497665] font-bold',
     },
     info: {
-      container: 'bg-blue-950/90 border-blue-500/40 text-blue-200 shadow-blue-950/50',
-      icon: 'text-blue-400',
-      title: 'text-blue-300 font-bold',
+      container: 'bg-[#eaf3f1] border-[#dce2e2] text-[#126b70] shadow-xs',
+      icon: 'text-[#126b70]',
+      title: 'text-[#173744] font-bold',
     },
     warning: {
-      container: 'bg-amber-950/90 border-amber-500/40 text-amber-200 shadow-amber-950/50',
-      icon: 'text-amber-400',
-      title: 'text-amber-300 font-bold',
+      container: 'bg-[#fef9e7] border-[#ffeeba] text-[#927626] shadow-xs',
+      icon: 'text-[#927626]',
+      title: 'text-[#927626] font-bold',
     },
     siaga: {
-      container: 'bg-amber-950/90 border-amber-500/50 text-amber-200 shadow-amber-950/50',
-      icon: 'text-amber-400',
-      title: 'text-amber-300 font-bold',
+      container: 'bg-[#fcf2e4] border-[#ffeeba] text-[#a9621d] shadow-xs',
+      icon: 'text-[#a9621d]',
+      title: 'text-[#a9621d] font-bold',
     },
     error: {
-      container: 'bg-rose-950/90 border-rose-500/50 text-rose-200 shadow-rose-950/50',
-      icon: 'text-rose-400',
-      title: 'text-rose-300 font-bold',
+      container: 'bg-[#fbeeeb] border-[#f5c6cb] text-[#b33e35] shadow-xs',
+      icon: 'text-[#b33e35]',
+      title: 'text-[#b33e35] font-bold',
     },
     awas: {
-      container: 'bg-rose-950/90 border-rose-500/60 text-rose-200 shadow-rose-950/50',
-      icon: 'text-rose-400 animate-pulse',
-      title: 'text-rose-300 font-bold',
+      container: 'bg-[#fbeeeb] border-[#f5c6cb] text-[#b33e35] shadow-xs',
+      icon: 'text-[#b33e35]',
+      title: 'text-[#b33e35] font-bold',
     },
   };
 
