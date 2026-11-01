@@ -14,7 +14,6 @@ import {
   MapPin,
   Layers,
   Crosshair,
-  CheckCircle2,
   Video,
   ExternalLink,
 } from 'lucide-react';
@@ -313,12 +312,6 @@ export default function FloodMap({
                         <MapPin className="w-3 h-3 text-[#b33e35]" />
                         {rep.district}
                       </span>
-                      {rep.isAiVerified && (
-                        <span className="inline-flex items-center gap-0.5 text-[9px] bg-purple-50 text-purple-700 font-bold px-1.5 py-0.5 rounded border border-purple-200">
-                          <CheckCircle2 className="w-2.5 h-2.5 text-purple-600" />
-                          Verified AI
-                        </span>
-                      )}
                     </div>
 
                     <p className="text-xs text-[#173744] mt-1.5 leading-snug">{rep.caption}</p>

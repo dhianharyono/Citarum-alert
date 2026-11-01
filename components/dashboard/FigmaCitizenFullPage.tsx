@@ -8,11 +8,9 @@ import {
   MapPin,
   Users,
   AlertTriangle,
-  Database,
   ThumbsUp,
   Video,
   ExternalLink,
-  Sparkles,
   Camera,
   X,
 } from 'lucide-react';
@@ -197,12 +195,6 @@ export function FigmaCitizenFullPage({
                           <span className='text-[10px] font-bold px-2 py-0.5 rounded bg-[#fcf2e4] text-[#a9621d] border border-[#ffeeba]'>
                             {report.depthCategory}
                           </span>
-                          {report.isAiVerified && (
-                            <span className='text-[10px] font-bold px-2 py-0.5 rounded bg-[#eaf3f1] text-[#126b70] border border-[#dce2e2] flex items-center gap-1'>
-                              <Sparkles className='w-3 h-3 text-[#126b70]' />
-                              <span>AI Verified</span>
-                            </span>
-                          )}
                         </div>
                       </div>
 
@@ -285,15 +277,6 @@ export function FigmaCitizenFullPage({
                 })}
               </div>
             )}
-
-            {/* Asal data laporan footnote (Frame 3:11612 968x52) */}
-            <div className='p-3.5 sm:px-6 bg-[#f5f6f5] border-t border-[#dce2e2] flex items-center gap-2 text-[11px] text-[#66757c]'>
-              <Database className='w-3.5 h-3.5 text-[#66757c] shrink-0' />
-              <span>
-                API laporan website: {reports.length} entri saat diperiksa pada{' '}
-                {displayDate}.
-              </span>
-            </div>
           </div>
         </div>
 

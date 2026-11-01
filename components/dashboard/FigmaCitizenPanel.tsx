@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import {
   MapPin,
   ChevronDown,
-  Sparkles,
   ThumbsUp,
   Video,
   Image as ImageIcon,
@@ -178,13 +177,6 @@ export function FigmaCitizenPanel({
                         <span>Live Stream</span>
                       </a>
                     )}
-
-                    {report.isAiVerified && (
-                      <span className='inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-50 border border-purple-200 text-[10px] font-semibold text-purple-700'>
-                        <Sparkles className='w-3 h-3 text-purple-600' />
-                        <span>Verified AI</span>
-                      </span>
-                    )}
                   </div>
 
                   {/* Bottom Voting Row */}
@@ -198,11 +190,10 @@ export function FigmaCitizenPanel({
                           e.stopPropagation();
                           onUpvote(report.id);
                         }}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${
-                          userVote === 'upvote'
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${userVote === 'upvote'
                             ? 'bg-[#126b70] text-white'
                             : 'bg-[#f8faf9] text-[#66757c] hover:text-[#173744] border border-[#dce2e2]'
-                        }`}
+                          }`}
                         title='Konfirmasi genangan masih ada'
                       >
                         <ThumbsUp className='w-3 h-3' />
@@ -215,11 +206,10 @@ export function FigmaCitizenPanel({
                           e.stopPropagation();
                           onDownvote(report.id);
                         }}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${
-                          userVote === 'downvote'
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded transition ${userVote === 'downvote'
                             ? 'bg-rose-700 text-white'
                             : 'bg-[#f8faf9] text-[#66757c] hover:text-[#173744] border border-[#dce2e2]'
-                        }`}
+                          }`}
                         title='Kondisi sudah surut'
                       >
                         <span>{report.downvotes || 0}</span>
