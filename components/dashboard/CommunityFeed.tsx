@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { formatAuthorName } from '@/lib/reports-store';
 
 interface CommunityFeedProps {
   reports: FloodReport[];
@@ -112,8 +113,8 @@ export function CommunityFeed({
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-bold text-xs sm:text-sm text-slate-100 break-words">
-                        {report.author}
+                      <span className="font-bold text-xs sm:text-sm text-slate-100 break-words capitalize">
+                        {formatAuthorName(report.author)}
                       </span>
                       {report.tiktokLiveUrl && (
                         <span className="inline-flex items-center gap-1 text-[9px] font-extrabold text-rose-400 bg-rose-500/15 border border-rose-500/40 px-1.5 py-0.5 rounded-md whitespace-nowrap animate-pulse">

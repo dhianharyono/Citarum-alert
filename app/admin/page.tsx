@@ -33,6 +33,7 @@ import { FloodReport, AWLRStation } from '@/types';
 import { FALLBACK_AWLR_STATIONS } from '@/lib/scraper';
 import { SituationalBulletinData } from '@/lib/bulletin-types';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { formatAuthorName } from '@/lib/reports-store';
 
 interface ConfigState {
   geminiConfigured: boolean;
@@ -893,8 +894,8 @@ export default function AdminDashboardPage() {
                       </div>
 
                       {/* Reporter Name */}
-                      <div className='font-bold text-lg text-[#172d3b]'>
-                        {report.author || 'Warga Anonim'}
+                      <div className='font-bold text-lg text-[#172d3b] capitalize'>
+                        {formatAuthorName(report.author)}
                       </div>
 
                       {/* Citizen Text Report */}

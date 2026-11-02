@@ -46,11 +46,14 @@ export function FigmaSummaryBar({
         {/* Row 1: Title and Time Context */}
         <div className='flex items-start justify-between'>
           <div>
+            <span className='text-[10px] sm:text-xs font-bold tracking-wider text-[#126b70] uppercase block'>
+              PEMANTAUAN BANJIR
+            </span>
             <h1 className='text-[30px] lg:text-[32px] font-bold text-[#173744] tracking-tight leading-tight'>
-              Pemantauan banjir & siaga warga
+              Pantau sungai & siaga bersama
             </h1>
             <p className='text-[14px] text-[#66757c] mt-1'>
-              Telemetri Sensor Sungai Resmi &amp; Crowdsourcing Siaga Warga
+              Sensor sungai dan informasi warga di Kabupaten Bandung.
             </p>
           </div>
 
@@ -73,7 +76,12 @@ export function FigmaSummaryBar({
               Status lokasi pantau
             </div>
             <div className='text-[11px] text-[#66757c] mt-0.5'>
-              Berdasarkan <CountingNumber value={stations.length} isLoading={isRefreshing} /> stasiun sungai aktif
+              Berdasarkan{' '}
+              <CountingNumber
+                value={stations.length}
+                isLoading={isRefreshing}
+              />{' '}
+              stasiun sungai aktif
             </div>
           </div>
 
@@ -121,8 +129,9 @@ export function FigmaSummaryBar({
               className='h-9 px-3.5 rounded bg-white hover:bg-slate-50 border border-[#dce2e2] text-xs font-semibold text-[#173744] flex items-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-60'
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 text-[#126b70] ${isRefreshing ? 'animate-spin' : ''
-                  }`}
+                className={`w-3.5 h-3.5 text-[#126b70] ${
+                  isRefreshing ? 'animate-spin' : ''
+                }`}
               />
               <span>{isRefreshing ? 'Memuat...' : 'Refresh'}</span>
             </button>
@@ -131,16 +140,16 @@ export function FigmaSummaryBar({
       </div>
 
       {/* MOBILE HEADER & STATS (Visible on mobile only) */}
-      <div className='flex md:hidden flex-col gap-3.5'>
-        {/* Title */}
+      <div className='flex md:hidden flex-col gap-3'>
+        {/* Title (Font lebih proporsional & ringkas di layar mobile) */}
         <div>
-          <span className='text-[11px] font-bold text-[#126b70] tracking-wider uppercase block'>
+          <span className='text-[10px] font-bold text-[#126b70] tracking-wider uppercase block'>
             PEMANTAUAN BANJIR
           </span>
-          <h1 className='text-[24px] font-bold text-[#173744] tracking-tight mt-1 leading-tight'>
+          <h1 className='text-lg sm:text-xl font-bold text-[#173744] tracking-tight mt-0.5 leading-snug'>
             Pantau sungai, siaga bersama
           </h1>
-          <p className='text-xs text-[#66757c] mt-1'>
+          <p className='text-[11px] sm:text-xs text-[#66757c] mt-0.5'>
             Sensor sungai dan informasi warga di Kabupaten Bandung.
           </p>
         </div>
@@ -161,7 +170,12 @@ export function FigmaSummaryBar({
         <div className='space-y-1.5'>
           <div className='flex items-center justify-between'>
             <span className='text-[10px] font-bold tracking-wider text-[#66757c] uppercase'>
-              STATUS DARI <CountingNumber value={stations.length} isLoading={isRefreshing} /> LOKASI PANTAU
+              STATUS DARI{' '}
+              <CountingNumber
+                value={stations.length}
+                isLoading={isRefreshing}
+              />{' '}
+              LOKASI PANTAU
             </span>
             <button
               onClick={onRefresh}

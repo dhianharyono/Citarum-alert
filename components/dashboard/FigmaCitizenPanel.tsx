@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { FloodReport } from '@/types';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { formatAuthorName } from '@/lib/reports-store';
 
 interface FigmaCitizenPanelProps {
   reports: FloodReport[];
@@ -57,40 +58,11 @@ export function FigmaCitizenPanel({
     });
 
   return (
-    <div className='w-full space-y-5'>
-      {/* CARD 1: BANTU SESAMA KOMUTER (Figma Mint Accent Card) */}
-      {/* <div className='w-full bg-[#eaf3f1] border border-[#dce2e2] rounded-md p-5 space-y-3.5 shadow-xs'>
-        <div className='flex items-center gap-2.5'>
-          <div className='w-8 h-8 rounded bg-white border border-[#dce2e2] flex items-center justify-center text-[#126b70] shadow-2xs'>
-            <Users className='w-4 h-4 text-[#126b70]' />
-          </div>
-          <h3 className='text-base font-bold text-[#173744]'>
-            Bantu Sesama Warga
-          </h3>
-        </div>
-
-        <p className='text-xs text-[#173744] leading-relaxed'>
-          Melihat genangan di perjalanan? Bagikan lokasi dan kondisi yang Anda
-          temui.
-        </p>
-
-        <button
-          onClick={onOpenReportModal}
-          className='w-full py-2.5 px-4 rounded bg-[#126b70] hover:bg-[#0e5458] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer'
-        >
-          <Plus className='w-4 h-4 stroke-[2.5]' />
-          <span>Buat Laporan Lapangan</span>
-        </button>
-
-        <div className='text-[11px] text-[#66757c]'>
-          Utamakan keselamatan saat mengambil foto.
-        </div>
-      </div> */}
-
+    <div className='w-full h-full flex flex-col min-h-0'>
       {/* CARD 2: LAPORAN LAPANGAN WARGA (Figma White Feed Card) */}
-      <div className='w-full bg-white border border-[#dce2e2] rounded-md p-5 space-y-4 shadow-xs'>
+      <div className='w-full bg-white border border-[#dce2e2] rounded-md p-4 sm:p-5 space-y-4 shadow-xs flex flex-col flex-1 min-h-0 max-h-[640px]'>
         {/* Header and Filter */}
-        <div className='flex items-center justify-between gap-2 pb-2.5 border-b border-[#edf0f0]'>
+        <div className='flex items-center justify-between gap-2 pb-2.5 border-b border-[#edf0f0] shrink-0'>
           <h3 className='text-sm sm:text-base font-bold text-[#173744] shrink-0'>
             Laporan Warga
           </h3>
@@ -135,7 +107,7 @@ export function FigmaCitizenPanel({
 
         {/* Reports Content: Loading State vs Empty State vs Live List */}
         {isLoading || (isRefreshing && reports.length === 0) ? (
-          <div className='py-12 px-4 flex flex-col items-center justify-center text-center space-y-3'>
+          <div className='flex-1 min-h-[300px] py-12 px-4 flex flex-col items-center justify-center text-center space-y-3'>
             <div className='w-5 h-5 border-2 border-[#126b70]/20 border-t-[#126b70] rounded-full animate-spin' />
             <span className='text-xs font-medium text-[#66757c]'>
               Memuat laporan warga terkini...
@@ -143,7 +115,7 @@ export function FigmaCitizenPanel({
           </div>
         ) : filteredReports.length === 0 ? (
           /* Empty State matching Figma 1:1 */
-          <div className='py-8 px-4 flex flex-col items-center justify-center text-center space-y-2 border border-dashed border-[#dce2e2] rounded bg-[#fbfcfb]'>
+          <div className='flex-1 min-h-[300px] py-8 px-4 flex flex-col items-center justify-center text-center space-y-2 border border-dashed border-[#dce2e2] rounded bg-[#fbfcfb]'>
             <div className='w-10 h-10 rounded-full bg-[#f0f3f2] flex items-center justify-center text-[#8a969a]'>
               <MapPin className='w-5 h-5 text-[#8a969a]' />
             </div>
@@ -156,8 +128,8 @@ export function FigmaCitizenPanel({
             </p>
           </div>
         ) : (
-          /* Live Thread List */
-          <div className='divide-y divide-[#edf0f0] max-h-[380px] overflow-y-auto custom-scrollbar pr-1'>
+          /* Live Thread List (Maksimal tinggi card sejajar dengan card Buletin) */
+          <div className='divide-y divide-[#edf0f0] overflow-y-auto custom-scrollbar pr-1 flex-1 min-h-0 max-h-[540px]'>
             {filteredReports.map((report) => {
               const userVote = userVotes[report.id];
               const depthColor =
@@ -176,7 +148,7 @@ export function FigmaCitizenPanel({
                   {/* Header: Author, District & Depth */}
                   <div className='flex items-center justify-between gap-1.5 flex-wrap'>
                     <div className='text-xs font-bold text-[#173744] group-hover:text-[#126b70] transition-colors truncate'>
-                      {report.author || 'Warga Anonim'}
+                      <span className='capitalize'>{formatAuthorName(report.author)}</span>
                       <span className='text-[#66757c] font-normal text-[11px] ml-1.5'>
                         • {report.district}
                       </span>

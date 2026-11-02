@@ -99,7 +99,7 @@ export function FigmaBulletinFullPage({
           setFetchedData(res.data);
         }
       })
-      .catch(() => { });
+      .catch(() => {});
 
     return () => {
       isCancelled = true;
@@ -122,15 +122,15 @@ export function FigmaBulletinFullPage({
   return (
     <div className='w-full space-y-6'>
       {/* 1. HEADER SECTION (Frame 3:11384 Judul dan edisi 1360x98) */}
-      <div className='flex flex-col md:flex-row md:items-end justify-between gap-4'>
+      <div className='flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4'>
         <div>
-          <span className='text-xs font-bold tracking-wider text-[#126b70] uppercase block'>
-            INFORMASI WILAYAH / ARSIP RESMI
+          <span className='text-[10px] sm:text-xs font-bold tracking-wider text-[#126b70] uppercase block'>
+            INFORMASI WILAYAH
           </span>
-          <h1 className='text-[28px] sm:text-[36px] font-bold text-[#172d3b] tracking-tight mt-1 leading-tight'>
-            Buletin wilayah
+          <h1 className='text-xl sm:text-2xl md:text-[32px] font-bold text-[#172d3b] tracking-tight mt-0.5 leading-tight'>
+            Buletin terkini
           </h1>
-          <p className='text-sm text-[#66757c] mt-1'>
+          <p className='text-xs sm:text-sm text-[#66757c] mt-0.5'>
             {activeData.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
           </p>
         </div>

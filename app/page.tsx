@@ -226,7 +226,7 @@ export default function DashboardPage() {
             setAiSummary(summaryRes.data);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     } else {
       throw new Error(data.error || 'Gagal menyimpan laporan');
     }
@@ -377,16 +377,16 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Row 2: Bulletin (Left) + Citizen Panel (Right) */}
-              <div className='grid grid-cols-12 gap-5 items-start pt-1'>
-                <div className='col-span-8'>
+              {/* Row 2: Bulletin (Left) + Citizen Panel (Right) - Sejajar secara presisi di desktop */}
+              <div className='grid grid-cols-12 gap-5 items-stretch pt-1'>
+                <div className='col-span-8 flex flex-col'>
                   <FigmaBulletin
                     bulletin={bulletin}
                     lastUpdated={lastUpdated}
                   />
                 </div>
 
-                <div className='col-span-4'>
+                <div className='col-span-4 flex flex-col min-h-0'>
                   <FigmaCitizenPanel
                     reports={reports}
                     userVotes={userVotes}

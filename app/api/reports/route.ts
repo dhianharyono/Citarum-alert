@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { FloodReport, WaterDepthCategory } from '@/types';
 import { verifyFloodImageWithGemini } from '@/lib/gemini';
 import { db, schema } from '@/db';
-import { IN_MEMORY_REPORTS, addInMemoryReport, isReportFromToday } from '@/lib/reports-store';
+import { IN_MEMORY_REPORTS, addInMemoryReport, isReportFromToday, formatAuthorName } from '@/lib/reports-store';
 import { uploadToVercelBlob } from '@/lib/blob';
 
 const reportInputSchema = z.object({
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
       if (dbReports.length > 0) {
         const formatted: FloodReport[] = dbReports.map((r) => ({
           id: r.id,
-          author: r.authorName,
+          author: formatAuthorName(r.authorName),
           district: r.district,
           caption: r.caption,
           depthCategory: r.waterDepthCategory as WaterDepthCategory,
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
 
     const newReport: FloodReport = {
       id: `rep-${Date.now()}`,
-      author: author && author.trim() ? author.trim() : 'Warga Anonim',
+      author: formatAuthorName(author),
       district,
       caption,
       depthCategory,

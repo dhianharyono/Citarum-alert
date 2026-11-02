@@ -103,9 +103,9 @@ export function FigmaBulletin({ bulletin, lastUpdated }: FigmaBulletinProps) {
       : DEFAULT_BULLETIN.regions;
 
   return (
-    <div className="w-full bg-white border border-[#dce2e2] rounded-md overflow-hidden shadow-xs flex flex-col">
+    <div className="w-full bg-white border border-[#dce2e2] rounded-md overflow-hidden shadow-xs flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-[#dce2e2] flex items-center justify-between">
+      <div className="p-4 sm:p-5 border-b border-[#dce2e2] flex items-center justify-between shrink-0">
         <div>
           <h2 className="text-[17px] font-bold text-[#173744]">
             {activeData.title || 'Buletin Informasi Terkini Kabupaten Bandung'}
@@ -120,7 +120,7 @@ export function FigmaBulletin({ bulletin, lastUpdated }: FigmaBulletinProps) {
       </div>
 
       {/* Corridor Rows */}
-      <div className="divide-y divide-[#dce2e2]">
+      <div className="divide-y divide-[#dce2e2] flex-1">
         {regionsList.map((item, idx) => {
           const { Icon, iconBg, iconColor, badgeClass } = getRegionIconAndStyle(item);
           return (

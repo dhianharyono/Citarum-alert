@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, schema } from '@/db';
-import { IN_MEMORY_REPORTS, isReportFromToday } from '@/lib/reports-store';
+import { IN_MEMORY_REPORTS, isReportFromToday, formatAuthorName } from '@/lib/reports-store';
 import { FloodReport, WaterDepthCategory } from '@/types';
 import { generateCitizenReportsAiSummary } from '@/lib/reports-summary';
 
@@ -11,7 +11,7 @@ async function getActiveReports(includeAll: boolean = false): Promise<FloodRepor
       if (dbReports.length > 0) {
         const formatted: FloodReport[] = dbReports.map((r) => ({
           id: r.id,
-          author: r.authorName,
+          author: formatAuthorName(r.authorName),
           district: r.district,
           caption: r.caption,
           depthCategory: r.waterDepthCategory as WaterDepthCategory,

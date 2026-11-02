@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { ADMIN_AUTH_COOKIE_NAME, ADMIN_AUTH_TOKEN_VALUE } from '@/lib/admin-config';
-import { deleteReportById, toggleReportVerification, IN_MEMORY_REPORTS } from '@/lib/reports-store';
+import { deleteReportById, toggleReportVerification, IN_MEMORY_REPORTS, formatAuthorName } from '@/lib/reports-store';
 import { db, schema } from '@/db';
 import { eq, desc, lt } from 'drizzle-orm';
 import { deleteFromVercelBlob } from '@/lib/blob';
@@ -28,7 +28,7 @@ export async function GET() {
       if (dbReports.length > 0) {
         const formatted = dbReports.map((r) => ({
           id: r.id,
-          author: r.authorName,
+          author: formatAuthorName(r.authorName),
           district: r.district,
           caption: r.caption,
           depthCategory: r.waterDepthCategory,
