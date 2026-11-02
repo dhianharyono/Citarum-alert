@@ -16,7 +16,7 @@ export function FigmaNavbar({
   onOpenReportModal,
 }: FigmaNavbarProps) {
   return (
-    <nav className='w-full bg-white border-b border-[#dce2e2] sticky top-0 z-40'>
+    <nav className='w-full bg-white border-b border-[#dce2e2] sticky top-0 z-50'>
       {/* DESKTOP NAVBAR (Height 80px) */}
       <div className='hidden md:flex max-w-[1440px] mx-auto h-20 px-6 lg:px-10 items-center justify-between'>
         {/* Brand Identity */}

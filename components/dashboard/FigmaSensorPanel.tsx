@@ -3,12 +3,17 @@
 import React from 'react';
 import { Info, Radio } from 'lucide-react';
 import { AWLRStation } from '@/types';
+import { CountingNumber } from '@/components/ui/CountingNumber';
 
 interface FigmaSensorPanelProps {
   stations: AWLRStation[];
+  isLoading?: boolean;
 }
 
-export function FigmaSensorPanel({ stations }: FigmaSensorPanelProps) {
+export function FigmaSensorPanel({
+  stations,
+  isLoading = false,
+}: FigmaSensorPanelProps) {
   // Urutkan stasiun dari AWAS -> SIAGA -> WASPADA -> NORMAL
   const sortedStations = [...stations].sort((a, b) => {
     const priority: Record<string, number> = {
@@ -32,7 +37,7 @@ export function FigmaSensorPanel({ stations }: FigmaSensorPanelProps) {
             </h2>
           </div>
           <span className="text-xs text-[#66757c] font-medium">
-            {stations.length} lokasi
+            <CountingNumber value={stations.length} isLoading={isLoading} /> lokasi
           </span>
         </div>
         <p className="text-xs text-[#66757c] mt-0.5">
@@ -46,10 +51,13 @@ export function FigmaSensorPanel({ stations }: FigmaSensorPanelProps) {
       </div>
 
       {/* Station List (Scrollable if many stations) */}
-      <div className="flex-1 min-h-0 divide-y divide-[#dce2e2] overflow-y-auto custom-scrollbar">
+      <div className="flex-1 min-h-0 divide-y divide-[#dce2e2] overflow-y-auto custom-scrollbar flex flex-col">
         {sortedStations.length === 0 ? (
-          <div className="p-8 text-center text-xs text-[#66757c]">
-            Memuat data sensor sungai resmi...
+          <div className="flex-1 min-h-[240px] w-full flex flex-col items-center justify-center p-8 text-center text-xs text-[#66757c] gap-3">
+            <div className="w-5 h-5 border-2 border-[#126b70]/20 border-t-[#126b70] rounded-full animate-spin" />
+            <span className="font-medium text-[#66757c]">
+              Memuat data sensor sungai resmi...
+            </span>
           </div>
         ) : (
           sortedStations.map((st) => {
@@ -91,7 +99,7 @@ export function FigmaSensorPanel({ stations }: FigmaSensorPanelProps) {
                 <div className="flex items-baseline justify-between mt-2">
                   <div className="flex items-baseline gap-1">
                     <span className="font-mono text-2xl sm:text-[26px] font-bold text-[#173744] tracking-tight">
-                      {st.levelCm}
+                      <CountingNumber value={st.levelCm} isLoading={isLoading} />
                     </span>
                     <span className="text-xs font-semibold text-[#66757c]">
                       cm
@@ -99,7 +107,7 @@ export function FigmaSensorPanel({ stations }: FigmaSensorPanelProps) {
                   </div>
 
                   <span className="text-[11px] text-[#66757c]">
-                    Batas Awas: {st.dangerThresholdCm} cm
+                    Batas Awas: <CountingNumber value={st.dangerThresholdCm ?? 0} /> cm
                   </span>
                 </div>
               </div>

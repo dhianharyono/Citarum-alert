@@ -50,9 +50,17 @@ export async function GET(req: NextRequest) {
           createdAtIso: r.createdAt.toISOString(),
         }));
 
-        const finalData = includeAll
+        const sortByNewest = (a: FloodReport, b: FloodReport) => {
+          const timeA = a.createdAtIso ? new Date(a.createdAtIso).getTime() : 0;
+          const timeB = b.createdAtIso ? new Date(b.createdAtIso).getTime() : 0;
+          if (timeA && timeB && timeA !== timeB) return timeB - timeA;
+          return b.id.localeCompare(a.id);
+        };
+
+        const finalData = (includeAll
           ? formatted
-          : formatted.filter((r) => isReportFromToday(r.createdAtIso));
+          : formatted.filter((r) => isReportFromToday(r.createdAtIso))
+        ).sort(sortByNewest);
 
         return NextResponse.json({ success: true, data: finalData });
       }
@@ -61,9 +69,17 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const finalInMemory = includeAll
+  const sortByNewest = (a: FloodReport, b: FloodReport) => {
+    const timeA = a.createdAtIso ? new Date(a.createdAtIso).getTime() : 0;
+    const timeB = b.createdAtIso ? new Date(b.createdAtIso).getTime() : 0;
+    if (timeA && timeB && timeA !== timeB) return timeB - timeA;
+    return b.id.localeCompare(a.id);
+  };
+
+  const finalInMemory = (includeAll
     ? IN_MEMORY_REPORTS
-    : IN_MEMORY_REPORTS.filter((r) => isReportFromToday(r.createdAtIso));
+    : IN_MEMORY_REPORTS.filter((r) => isReportFromToday(r.createdAtIso))
+  ).sort(sortByNewest);
 
   return NextResponse.json({ success: true, data: finalInMemory });
 }

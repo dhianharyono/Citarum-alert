@@ -75,3 +75,18 @@ export interface VerificationResult {
   debrisOrVehiclesAffected: boolean;
 }
 
+export interface CitizenReportsAiSummary {
+  headline: string;
+  summary: string;
+  keyHotspots: Array<{
+    district: string;
+    condition: string;
+    depthLevel?: string;
+  }>;
+  highestDepth?: string;
+  totalAnalyzed: number;
+  urgentNote?: string;
+  generatedAt: string;
+}
+
+

@@ -13,6 +13,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 interface CommunityFeedProps {
   reports: FloodReport[];
@@ -34,10 +35,17 @@ export function CommunityFeed({
 
   const districts = ['all', ...Array.from(new Set(reports.map((r) => r.district)))];
 
-  const filtered = reports.filter((r) => {
-    if (selectedDistrict === 'all') return true;
-    return r.district === selectedDistrict;
-  });
+  const filtered = reports
+    .filter((r) => {
+      if (selectedDistrict === 'all') return true;
+      return r.district === selectedDistrict;
+    })
+    .sort((a, b) => {
+      const timeA = a.createdAtIso ? new Date(a.createdAtIso).getTime() : 0;
+      const timeB = b.createdAtIso ? new Date(b.createdAtIso).getTime() : 0;
+      if (timeA && timeB && timeA !== timeB) return timeB - timeA;
+      return b.id.localeCompare(a.id);
+    });
 
   const getDepthBadgeVariant = (depth: string) => {
     if (depth.includes('>1 Meter') || depth.includes('Diatas 1')) return 'awas';
@@ -58,25 +66,22 @@ export function CommunityFeed({
         </div>
 
         {/* District Filter Dropdown */}
-        <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-lg">
-          <Filter className="w-3 h-3 text-slate-400 shrink-0" />
-          <select
-            value={selectedDistrict}
-            onChange={(e) => setSelectedDistrict(e.target.value)}
-            className="bg-transparent text-xs text-slate-300 focus:outline-none cursor-pointer"
-          >
-            <option value="all" className="bg-slate-900 text-slate-200">
-              Semua Wilayah ({reports.length})
-            </option>
-            {districts
+        <Dropdown
+          value={selectedDistrict}
+          onChange={setSelectedDistrict}
+          options={[
+            { value: 'all', label: `Semua Wilayah (${reports.length})` },
+            ...districts
               .filter((d) => d !== 'all')
-              .map((d) => (
-                <option key={d} value={d} className="bg-slate-900 text-slate-200">
-                  {d}
-                </option>
-              ))}
-          </select>
-        </div>
+              .map((d) => ({
+                value: d,
+                label: d,
+              })),
+          ]}
+          size="sm"
+          align="right"
+          icon={<Filter className="w-3.5 h-3.5" />}
+        />
       </div>
 
       {/* Feed List */}

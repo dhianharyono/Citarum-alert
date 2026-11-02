@@ -16,6 +16,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { CreateReportInput, WaterDepthCategory } from '@/types';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 interface ReportFormModalProps {
   isOpen: boolean;
@@ -208,7 +209,9 @@ export function ReportFormModal({
     } catch (err: unknown) {
       console.error(err);
       setSubmitError(
-        err instanceof Error ? err.message : 'Terjadi kesalahan sistem saat mengirim laporan',
+        err instanceof Error
+          ? err.message
+          : 'Terjadi kesalahan sistem saat mengirim laporan',
       );
     } finally {
       setIsSubmitting(false);
@@ -268,20 +271,6 @@ export function ReportFormModal({
               </p>
             </div>
 
-            {/* Notice Card: Safety First (Figma Frame 3:10759 / 3:11142) */}
-            <div className='p-3.5 sm:p-4 bg-[#eaf3f1] border border-[#dce2e2] rounded flex items-start gap-2.5'>
-              <Info className='w-4 h-4 text-[#126b70] shrink-0 mt-0.5' />
-              <div className='text-xs text-[#173744] leading-relaxed'>
-                <span className='font-bold sm:hidden block mb-0.5'>
-                  Utamakan keselamatan
-                </span>
-                <span>
-                  Laporkan dari tempat aman. Jangan menerobos genangan atau
-                  mengambil foto sambil berkendara.
-                </span>
-              </div>
-            </div>
-
             {/* Desktop 2-Column / Mobile 1-Column Layout */}
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-7 items-start'>
               {/* LEFT COLUMN: Lokasi & Kondisi Lapangan */}
@@ -299,26 +288,29 @@ export function ReportFormModal({
                       Kawasan / Kecamatan{' '}
                       <span className='text-[#b33e35]'>*</span>
                     </label>
-                    <select
+                    <Dropdown
                       value={district}
-                      onChange={(e) => setDistrict(e.target.value)}
-                      className='w-full h-11 bg-white border border-[#dce2e2] rounded px-3 text-xs sm:text-sm text-[#172d3b] font-medium focus:outline-none focus:border-[#126b70] cursor-pointer'
-                    >
-                      <optgroup label='📍 Titik Langganan Banjir & Koridor Arteri'>
-                        {PRIMARY_HOTSPOT_ZONES.map((d) => (
-                          <option key={d} value={d}>
-                            {d}
-                          </option>
-                        ))}
-                      </optgroup>
-                      <optgroup label='🏛 Seluruh 31 Kecamatan Kab. Bandung'>
-                        {KAB_BANDUNG_31_KECAMATAN.map((d) => (
-                          <option key={d} value={d}>
-                            {d}
-                          </option>
-                        ))}
-                      </optgroup>
-                    </select>
+                      onChange={setDistrict}
+                      options={[
+                        {
+                          label: '📍 Titik Langganan Banjir & Koridor Arteri',
+                          options: PRIMARY_HOTSPOT_ZONES.map((d) => ({
+                            value: d,
+                            label: d,
+                          })),
+                        },
+                        {
+                          label: '🏛 Seluruh 31 Kecamatan Kab. Bandung',
+                          options: KAB_BANDUNG_31_KECAMATAN.map((d) => ({
+                            value: d,
+                            label: d,
+                          })),
+                        },
+                      ]}
+                      fullWidth
+                      size='lg'
+                      placeholder='Pilih Kawasan / Kecamatan...'
+                    />
                   </div>
 
                   {/* GPS Lock */}
@@ -349,10 +341,11 @@ export function ReportFormModal({
                       type='button'
                       onClick={handleLockGPS}
                       disabled={isGpsLoading}
-                      className={`w-full h-11 px-4 rounded border text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${gpsLocked
-                        ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70]'
-                        : 'bg-white hover:bg-[#f5f6f5] border-[#dce2e2] text-[#126b70]'
-                        }`}
+                      className={`w-full h-11 px-4 rounded border text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${
+                        gpsLocked
+                          ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70]'
+                          : 'bg-white hover:bg-[#f5f6f5] border-[#dce2e2] text-[#126b70]'
+                      }`}
                     >
                       {isGpsLoading ? (
                         <>
@@ -432,10 +425,11 @@ export function ReportFormModal({
                           type='button'
                           key={category}
                           onClick={() => setDepthCategory(category)}
-                          className={`p-2.5 rounded border text-left text-xs font-medium transition cursor-pointer ${depthCategory === category
-                            ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70] font-bold'
-                            : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b]'
-                            }`}
+                          className={`p-2.5 rounded border text-left text-xs font-medium transition cursor-pointer ${
+                            depthCategory === category
+                              ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70] font-bold'
+                              : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b]'
+                          }`}
                         >
                           {category}
                         </button>
@@ -469,20 +463,22 @@ export function ReportFormModal({
                     <button
                       type='button'
                       onClick={() => setEvidenceType('photo')}
-                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${evidenceType === 'photo'
-                        ? 'bg-[#eaf3f1] text-[#126b70]'
-                        : 'text-[#66757c] hover:text-[#172d3b]'
-                        }`}
+                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${
+                        evidenceType === 'photo'
+                          ? 'bg-[#eaf3f1] text-[#126b70]'
+                          : 'text-[#66757c] hover:text-[#172d3b]'
+                      }`}
                     >
                       Foto Lapangan
                     </button>
                     <button
                       type='button'
                       onClick={() => setEvidenceType('tiktok')}
-                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${evidenceType === 'tiktok'
-                        ? 'bg-[#eaf3f1] text-[#126b70]'
-                        : 'text-[#66757c] hover:text-[#172d3b]'
-                        }`}
+                      className={`py-2 text-xs font-semibold rounded transition cursor-pointer ${
+                        evidenceType === 'tiktok'
+                          ? 'bg-[#eaf3f1] text-[#126b70]'
+                          : 'text-[#66757c] hover:text-[#172d3b]'
+                      }`}
                     >
                       URL Live TikTok
                     </button>
@@ -608,7 +604,9 @@ export function ReportFormModal({
             {submitError && (
               <div className='flex items-start gap-2 text-xs text-[#b33e35] bg-[#fbeeeb] p-2.5 rounded border border-[#f5c6cb]'>
                 <AlertTriangle className='w-4 h-4 shrink-0 mt-0.5 text-[#b33e35]' />
-                <span className='leading-relaxed font-medium'>{submitError}</span>
+                <span className='leading-relaxed font-medium'>
+                  {submitError}
+                </span>
               </div>
             )}
 
@@ -625,10 +623,11 @@ export function ReportFormModal({
               <button
                 type='submit'
                 disabled={!isFormValid || isSubmitting}
-                className={`w-full sm:w-auto h-11 px-6 rounded font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs ${isFormValid && !isSubmitting
-                  ? 'bg-[#126b70] hover:bg-[#0e5458] text-white'
-                  : 'bg-[#e4e9e9] text-[#718087] cursor-not-allowed opacity-80'
-                  }`}
+                className={`w-full sm:w-auto h-11 px-6 rounded font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs ${
+                  isFormValid && !isSubmitting
+                    ? 'bg-[#126b70] hover:bg-[#0e5458] text-white'
+                    : 'bg-[#e4e9e9] text-[#718087] cursor-not-allowed opacity-80'
+                }`}
               >
                 {isSubmitting ? (
                   <>

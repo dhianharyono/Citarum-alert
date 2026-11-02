@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { ArrowRight } from 'lucide-react';
-import { AWLRStation, FloodReport, CreateReportInput } from '@/types';
+import { AWLRStation, FloodReport, CreateReportInput, CitizenReportsAiSummary } from '@/types';
 import { FigmaNavbar } from '@/components/dashboard/FigmaNavbar';
 import { FigmaSummaryBar } from '@/components/dashboard/FigmaSummaryBar';
 import { FigmaSensorPanel } from '@/components/dashboard/FigmaSensorPanel';
@@ -20,8 +20,9 @@ import { SituationalBulletinData } from '@/lib/bulletin-types';
 const FloodMap = dynamic(() => import('@/components/map/FloodMap'), {
   ssr: false,
   loading: () => (
-    <div className='w-full h-[360px] sm:h-[462px] bg-white border border-[#dce2e2] rounded-md animate-pulse flex items-center justify-center text-[#66757c] text-xs'>
-      Memuat Peta Spasial Citarum Alert...
+    <div className='w-full h-full min-h-[380px] md:h-[560px] bg-white border border-[#dce2e2] rounded-md animate-pulse flex flex-col items-center justify-center text-[#66757c] text-xs gap-3'>
+      <div className='w-5 h-5 border-2 border-[#126b70]/20 border-t-[#126b70] rounded-full animate-spin' />
+      <span>Memuat Peta Spasial Citarum Alert...</span>
     </div>
   ),
 });
@@ -39,6 +40,8 @@ export default function DashboardPage() {
   const [bulletin, setBulletin] = useState<SituationalBulletinData | null>(
     null,
   );
+  const [aiSummary, setAiSummary] = useState<CitizenReportsAiSummary | null>(null);
+  const [isGeneratingAiSummary, setIsGeneratingAiSummary] = useState<boolean>(false);
   const [userVotes, setUserVotes] = useState<
     Record<string, 'upvote' | 'downvote'>
   >({});
@@ -65,12 +68,23 @@ export default function DashboardPage() {
     setIsRefreshing(true);
     const start = Date.now();
     try {
-      const [resStations, resReports, resBulletin] = await Promise.all([
+      const [resStations, resReports, resBulletin, resAiSummary] = await Promise.all([
         fetch('/api/stations').then((r) => r.json()),
         fetch('/api/reports').then((r) => r.json()),
-        fetch('/api/bulletin')
+        fetch('/api/bulletin/generate', { method: 'POST' })
           .then((r) => r.json())
-          .catch(() => null),
+          .catch(() =>
+            fetch('/api/bulletin')
+              .then((r) => r.json())
+              .catch(() => null),
+          ),
+        fetch('/api/reports/summary', { method: 'POST' })
+          .then((r) => r.json())
+          .catch(() =>
+            fetch('/api/reports/summary')
+              .then((r) => r.json())
+              .catch(() => null),
+          ),
       ]);
 
       if (resStations.success) {
@@ -83,6 +97,10 @@ export default function DashboardPage() {
 
       if (resBulletin && resBulletin.success && resBulletin.data) {
         setBulletin(resBulletin.data);
+      }
+
+      if (resAiSummary && resAiSummary.success && resAiSummary.data) {
+        setAiSummary(resAiSummary.data);
       }
 
       setLastUpdated(
@@ -104,15 +122,37 @@ export default function DashboardPage() {
     }
   };
 
+  const handleRefreshAiSummary = async () => {
+    setIsGeneratingAiSummary(true);
+    try {
+      const res = await fetch('/api/reports/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reports }),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setAiSummary(data.data);
+      }
+    } catch (err) {
+      console.warn('Refresh AI summary error:', err);
+    } finally {
+      setIsGeneratingAiSummary(false);
+    }
+  };
+
   useEffect(() => {
     let isCancelled = false;
 
     const performFetch = async () => {
       try {
-        const [resStations, resReports, resBulletin] = await Promise.all([
+        const [resStations, resReports, resBulletin, resAiSummary] = await Promise.all([
           fetch('/api/stations').then((r) => r.json()),
           fetch('/api/reports').then((r) => r.json()),
           fetch('/api/bulletin')
+            .then((r) => r.json())
+            .catch(() => null),
+          fetch('/api/reports/summary')
             .then((r) => r.json())
             .catch(() => null),
         ]);
@@ -128,6 +168,10 @@ export default function DashboardPage() {
 
           if (resBulletin && resBulletin.success && resBulletin.data) {
             setBulletin(resBulletin.data);
+          }
+
+          if (resAiSummary && resAiSummary.success && resAiSummary.data) {
+            setAiSummary(resAiSummary.data);
           }
 
           setLastUpdated(
@@ -166,8 +210,23 @@ export default function DashboardPage() {
 
     const data = await res.json();
     if (data.success && data.data) {
-      setReports((prev) => [data.data, ...prev]);
+      const updatedReports = [data.data, ...reports];
+      setReports(updatedReports);
       setSelectedReport(data.data);
+
+      // Refresh AI summary in background with new report included
+      fetch('/api/reports/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reports: updatedReports }),
+      })
+        .then((r) => r.json())
+        .then((summaryRes) => {
+          if (summaryRes.success && summaryRes.data) {
+            setAiSummary(summaryRes.data);
+          }
+        })
+        .catch(() => {});
     } else {
       throw new Error(data.error || 'Gagal menyimpan laporan');
     }
@@ -311,7 +370,10 @@ export default function DashboardPage() {
                 </div>
 
                 <div className='col-span-4 h-full flex flex-col'>
-                  <FigmaSensorPanel stations={stations} />
+                  <FigmaSensorPanel
+                    stations={stations}
+                    isLoading={isRefreshing}
+                  />
                 </div>
               </div>
 
@@ -332,6 +394,9 @@ export default function DashboardPage() {
                     onDownvote={handleDownvote}
                     onOpenReportModal={() => setIsModalOpen(true)}
                     onSelectReport={(rep) => setSelectedReport(rep)}
+                    onRefresh={handleManualRefresh}
+                    isRefreshing={isRefreshing}
+                    isLoading={isRefreshing || (reports.length === 0 && !lastUpdated)}
                   />
                 </div>
               </div>
@@ -356,7 +421,10 @@ export default function DashboardPage() {
               </div>
 
               <div className='w-full'>
-                <FigmaSensorPanel stations={stations} />
+                <FigmaSensorPanel
+                  stations={stations}
+                  isLoading={isRefreshing}
+                />
               </div>
 
               {/* Quick Navigation Cards */}
@@ -414,6 +482,12 @@ export default function DashboardPage() {
             onOpenReportModal={() => setIsModalOpen(true)}
             onSelectReport={(rep) => setSelectedReport(rep)}
             lastUpdated={lastUpdated}
+            aiSummary={aiSummary}
+            onRefreshSummary={handleRefreshAiSummary}
+            isGeneratingSummary={isGeneratingAiSummary}
+            onRefresh={handleManualRefresh}
+            isRefreshing={isRefreshing}
+            isLoading={isRefreshing || (reports.length === 0 && !lastUpdated)}
           />
         )}
       </main>

@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Info,
-  ChevronDown,
   Plus,
   MapPin,
   Users,
@@ -13,8 +12,13 @@ import {
   ExternalLink,
   Camera,
   X,
+  Filter,
+  Sparkles,
+  RotateCw,
+  AlertCircle,
 } from 'lucide-react';
-import { FloodReport } from '@/types';
+import { FloodReport, CitizenReportsAiSummary } from '@/types';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 interface FigmaCitizenFullPageProps {
   reports: FloodReport[];
@@ -24,6 +28,12 @@ interface FigmaCitizenFullPageProps {
   onOpenReportModal: () => void;
   onSelectReport?: (report: FloodReport) => void;
   lastUpdated?: string;
+  aiSummary?: CitizenReportsAiSummary | null;
+  onRefreshSummary?: () => void;
+  isGeneratingSummary?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+  isLoading?: boolean;
 }
 
 export function FigmaCitizenFullPage({
@@ -33,53 +43,106 @@ export function FigmaCitizenFullPage({
   onDownvote,
   onOpenReportModal,
   onSelectReport,
-  lastUpdated,
+  aiSummary,
+  onRefreshSummary,
+  isGeneratingSummary,
+  onRefresh,
+  isRefreshing = false,
+  isLoading = false,
 }: FigmaCitizenFullPageProps) {
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [standaloneSummary, setStandaloneSummary] =
+    useState<CitizenReportsAiSummary | null>(null);
+  const [standaloneLoading, setStandaloneLoading] = useState<boolean>(false);
+
+  // Fetch only if parent did not provide aiSummary or a refresh handler
+  useEffect(() => {
+    if (aiSummary || onRefreshSummary) return;
+
+    let ignore = false;
+    fetch('/api/reports/summary')
+      .then((res) => res.json())
+      .then((data) => {
+        if (!ignore && data.success && data.data) {
+          setStandaloneSummary(data.data);
+        }
+      })
+      .catch((e) => {
+        console.warn('Failed to load reports summary:', e);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [aiSummary, onRefreshSummary]);
+
+  const handleRegenerateSummary = async () => {
+    if (onRefreshSummary) {
+      onRefreshSummary();
+      return;
+    }
+    setStandaloneLoading(true);
+    try {
+      const res = await fetch('/api/reports/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reports }),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setStandaloneSummary(data.data);
+      }
+    } catch (e) {
+      console.warn('Failed to re-generate summary:', e);
+    } finally {
+      setStandaloneLoading(false);
+    }
+  };
+
+  // Derive current summary directly during render
+  const currentSummary = aiSummary ?? standaloneSummary;
+  const isLoadingSummary = Boolean(isGeneratingSummary || standaloneLoading);
 
   const districts = Array.from(new Set(reports.map((r) => r.district))).filter(
     Boolean,
   );
 
-  const filteredReports =
+  // Strictly sort newest first
+  const filteredReports = (
     selectedDistrict === 'all'
       ? reports
-      : reports.filter((r) => r.district === selectedDistrict);
-
-  const displayDate = lastUpdated || '1 Nov 2026';
+      : reports.filter((r) => r.district === selectedDistrict)
+  )
+    .slice()
+    .sort((a, b) => {
+      const timeA = a.createdAtIso ? new Date(a.createdAtIso).getTime() : 0;
+      const timeB = b.createdAtIso ? new Date(b.createdAtIso).getTime() : 0;
+      if (timeA && timeB && timeA !== timeB) return timeB - timeA;
+      return b.id.localeCompare(a.id);
+    });
 
   return (
     <div className='w-full space-y-6'>
-      {/* Lightbox Photo Preview Modal */}
+      {/* Lightbox Photo Preview Modal (Clean, borderless, frameless) */}
       {previewImage && (
         <div
-          className='fixed inset-0 z-50 bg-[#102530]/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in'
+          className='fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150 cursor-zoom-out'
           onClick={() => setPreviewImage(null)}
         >
-          <div
-            className='relative max-w-2xl w-full bg-white rounded-lg overflow-hidden shadow-2xl border border-[#dce2e2]'
-            onClick={(e) => e.stopPropagation()}
+          <button
+            onClick={() => setPreviewImage(null)}
+            className='absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition cursor-pointer'
+            title='Tutup (Esc)'
           >
-            <div className='p-3 bg-[#f8faf9] border-b border-[#dce2e2] flex items-center justify-between'>
-              <span className='text-xs font-semibold text-[#172d3b]'>
-                Bukti Foto Lapangan Warga
-              </span>
-              <button
-                onClick={() => setPreviewImage(null)}
-                className='p-1 rounded text-[#66757c] hover:text-[#172d3b] hover:bg-slate-200/60'
-              >
-                <X className='w-4 h-4' />
-              </button>
-            </div>
-            <div className='p-2 bg-[#f5f6f5]'>
-              <img
-                src={previewImage}
-                alt='Bukti foto banjir'
-                className='w-full h-auto max-h-[75vh] object-contain rounded'
-              />
-            </div>
-          </div>
+            <X className='w-5 h-5' />
+          </button>
+          <img
+            src={previewImage}
+            alt='Bukti foto banjir'
+            className='max-w-full max-h-[92vh] object-contain cursor-default select-none shadow-2xl'
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
 
@@ -99,52 +162,75 @@ export function FigmaCitizenFullPage({
         </div>
       </div>
 
-      {/* 3. MAIN CONTENT 2-COLUMN (Frame 3:11612 Laporan dan panduan 1360x501) */}
+      {/* 2. MAIN CONTENT 2-COLUMN (Frame 3:11612 Laporan dan panduan 1360x501) */}
       <div className='grid grid-cols-1 lg:grid-cols-12 gap-6 items-start'>
         {/* LEFT COLUMN: Daftar Laporan (8 or 8.5 cols) */}
         <div className='lg:col-span-8 space-y-4'>
-          <div className='bg-white border border-[#dce2e2] rounded-md shadow-xs overflow-hidden'>
-            {/* Header: Count & Filter */}
-            <div className='p-4 sm:p-6 border-b border-[#dce2e2] flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
-              <div>
-                <div className='text-lg sm:text-xl font-bold text-[#172d3b]'>
+          <div className='bg-white border border-[#dce2e2] rounded-md shadow-xs overflow-hidden flex flex-col min-h-[424px]'>
+            {/* Header: Count, Filter & Refresh Button */}
+            <div className='px-4 py-2.5 sm:px-5 sm:py-3 border-b border-[#dce2e2] flex items-center justify-between gap-2.5 bg-white shrink-0'>
+              <div className='flex items-baseline gap-2'>
+                <span className='text-sm sm:text-base font-bold text-[#172d3b]'>
                   {filteredReports.length} laporan
-                </div>
-                <div className='text-xs text-[#66757c] mt-0.5'>
+                </span>
+                <span className='text-xs text-[#66757c] font-normal hidden sm:inline'>
+                  •{' '}
                   {selectedDistrict === 'all'
                     ? 'Semua kecamatan'
                     : `Kecamatan ${selectedDistrict}`}
-                </div>
+                </span>
               </div>
 
-              <div className='w-full sm:w-56 space-y-1'>
-                <label className='text-[11px] font-semibold text-[#172d3b] block'>
-                  Filter kecamatan
-                </label>
-                <div className='relative'>
-                  <select
+              <div className='flex items-center gap-1.5'>
+                <div className='w-32 sm:w-44'>
+                  <Dropdown
                     value={selectedDistrict}
-                    onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className='w-full h-10 appearance-none bg-white border border-[#dce2e2] rounded px-3 pr-8 text-xs font-semibold text-[#172d3b] focus:outline-none focus:border-[#126b70] cursor-pointer'
-                  >
-                    <option value='all'>
-                      Semua Wilayah ({reports.length})
-                    </option>
-                    {districts.map((d) => (
-                      <option key={d} value={d}>
-                        {d} ({reports.filter((r) => r.district === d).length})
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className='w-3.5 h-3.5 text-[#66757c] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none' />
+                    onChange={setSelectedDistrict}
+                    options={[
+                      {
+                        value: 'all',
+                        label: `Semua (${reports.length})`,
+                      },
+                      ...districts.map((d) => ({
+                        value: d,
+                        label: `${d} (${reports.filter((r) => r.district === d).length})`,
+                      })),
+                    ]}
+                    fullWidth
+                    size='sm'
+                    icon={<Filter className='w-3 h-3 text-[#126b70]' />}
+                  />
                 </div>
+
+                {onRefresh && (
+                  <button
+                    type='button'
+                    onClick={onRefresh}
+                    disabled={isRefreshing}
+                    title='Segarkan Laporan Warga'
+                    className='h-8 w-8 rounded border border-[#dce2e2] bg-white hover:bg-[#f5f6f5] flex items-center justify-center text-[#66757c] hover:text-[#172d3b] transition cursor-pointer disabled:opacity-50 shrink-0 shadow-2xs'
+                  >
+                    <RotateCw
+                      className={`w-3.5 h-3.5 ${
+                        isRefreshing ? 'animate-spin text-[#126b70]' : ''
+                      }`}
+                    />
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Empty State vs Live List */}
-            {filteredReports.length === 0 ? (
+            {/* Empty State vs Loading State vs Live List */}
+            {isLoading || (isRefreshing && reports.length === 0) ? (
+              <div className='flex-1 min-h-[360px] px-4 flex flex-col items-center justify-center text-center space-y-3'>
+                <div className='w-6 h-6 border-2 border-[#126b70]/20 border-t-[#126b70] rounded-full animate-spin' />
+                <span className='text-xs sm:text-sm font-medium text-[#66757c]'>
+                  Memuat laporan warga terkini...
+                </span>
+              </div>
+            ) : filteredReports.length === 0 ? (
               /* Frame 3:11612 Belum ada laporan genangan 968x327 */
-              <div className='p-8 sm:p-14 text-center flex flex-col items-center justify-center space-y-4'>
+              <div className='flex-1 min-h-[360px] p-8 sm:p-14 text-center flex flex-col items-center justify-center space-y-4'>
                 <div className='w-14 h-14 rounded-md bg-[#f5f6f5] border border-[#dce2e2] flex items-center justify-center text-[#66757c]'>
                   <MapPin className='w-7 h-7' />
                 </div>
@@ -169,88 +255,99 @@ export function FigmaCitizenFullPage({
                 </p>
               </div>
             ) : (
-              /* Live Report Cards */
-              <div className='divide-y divide-[#dce2e2]'>
+              <div className='divide-y divide-[#edf0f0] flex-1'>
                 {filteredReports.map((report) => {
                   const voteState = userVotes[report.id];
+                  const depthBadge =
+                    report.depthCategory === 'Diatas 1 Meter'
+                      ? 'bg-[#fbeeeb] text-[#b33e35] border-[#f5c6cb]'
+                      : report.depthCategory === 'Sepaha (50-80cm)'
+                        ? 'bg-[#fcf2e4] text-[#a9621d] border-[#ffeeba]'
+                        : 'bg-[#eaf3f1] text-[#497665] border-[#c3e6cb]';
+
                   return (
                     <div
                       key={report.id}
-                      className='p-4 sm:p-5 hover:bg-[#fbfcfb] transition-colors space-y-3 cursor-pointer'
+                      className='p-4 sm:p-5 hover:bg-[#fafbfa] transition-colors space-y-2.5 group cursor-pointer'
                       onClick={() => onSelectReport?.(report)}
                     >
-                      {/* Top Row: Author & Badges */}
-                      <div className='flex flex-wrap items-center justify-between gap-2'>
-                        <div className='flex items-center gap-2'>
-                          <span className='font-bold text-xs sm:text-sm text-[#172d3b]'>
-                            {report.author}
+                      {/* Header: Author Name, District, Time & Depth Badge */}
+                      <div className='flex items-center justify-between gap-2'>
+                        <div className='flex items-baseline gap-1.5 flex-wrap text-xs'>
+                          <span className='font-bold text-[#172d3b] group-hover:text-[#126b70] transition-colors'>
+                            {report.author || 'Warga Anonim'}
                           </span>
-                          <span className='text-[11px] text-[#66757c]'>•</span>
-                          <span className='text-[11px] font-semibold text-[#126b70]'>
-                            {report.district}
+                          <span className='text-[11px] text-[#66757c]'>
+                            • {report.district}
                           </span>
+                          {report.createdAt && (
+                            <span className='text-[11px] text-[#8a969a]'>
+                              • {report.createdAt}
+                            </span>
+                          )}
                         </div>
 
-                        <div className='flex items-center gap-1.5 flex-wrap'>
-                          <span className='text-[10px] font-bold px-2 py-0.5 rounded bg-[#fcf2e4] text-[#a9621d] border border-[#ffeeba]'>
-                            {report.depthCategory}
-                          </span>
-                        </div>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider shrink-0 ${depthBadge}`}
+                        >
+                          {report.depthCategory}
+                        </span>
                       </div>
 
-                      {/* Caption */}
-                      <p className='text-xs sm:text-sm text-[#172d3b] leading-relaxed'>
+                      {/* Message Body */}
+                      <p className='text-xs sm:text-sm text-[#172d3b] leading-relaxed whitespace-pre-line'>
                         {report.caption}
                       </p>
 
-                      {/* Photo / TikTok Evidence */}
-                      <div className='flex items-center gap-2 flex-wrap'>
-                        {report.imageUrl && (
-                          <button
-                            type='button'
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPreviewImage(report.imageUrl || null);
-                            }}
-                            className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#f5f6f5] hover:bg-[#edf0e9] border border-[#dce2e2] text-xs font-semibold text-[#172d3b] transition cursor-pointer'
-                          >
-                            <Camera className='w-3.5 h-3.5 text-[#126b70]' />
-                            <span>Lihat Foto Lapangan</span>
-                          </button>
-                        )}
+                      {/* Direct Photo Display & TikTok Evidence */}
+                      {report.imageUrl && (
+                        <div
+                          className='mt-1 overflow-hidden rounded-md border border-[#dce2e2] bg-[#f5f6f5] max-w-xs sm:max-w-sm group/img relative cursor-pointer'
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewImage(report.imageUrl || null);
+                          }}
+                          title='Klik untuk melihat foto lebih besar'
+                        >
+                          <img
+                            src={report.imageUrl}
+                            alt={`Bukti foto ${report.district}`}
+                            className='w-full h-36 sm:h-44 object-cover group-hover/img:scale-[1.02] transition-transform duration-200'
+                          />
+                          <div className='absolute bottom-1.5 right-1.5 bg-[#172d3b]/80 hover:bg-[#126b70] text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-xs flex items-center gap-1 transition'>
+                            <Camera className='w-3 h-3' />
+                            <span>Lihat Penuh</span>
+                          </div>
+                        </div>
+                      )}
 
-                        {report.tiktokLiveUrl && (
+                      {report.tiktokLiveUrl && (
+                        <div className='pt-0.5'>
                           <a
                             href={report.tiktokLiveUrl}
                             target='_blank'
                             rel='noopener noreferrer'
                             onClick={(e) => e.stopPropagation()}
-                            className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#f5f6f5] hover:bg-[#edf0e9] border border-[#dce2e2] text-xs font-semibold text-[#172d3b] transition cursor-pointer'
+                            className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#fbeeeb] hover:bg-[#fadad7] border border-[#f5c6cb] text-xs font-semibold text-[#b33e35] transition cursor-pointer shadow-2xs'
                           >
-                            <Video className='w-3.5 h-3.5 text-[#b33e35]' />
-                            <span>Pantau Live TikTok</span>
-                            <ExternalLink className='w-3 h-3 text-[#66757c]' />
+                            <Video className='w-3.5 h-3.5' />
+                            <span>Live TikTok</span>
                           </a>
-                        )}
-                      </div>
+                        </div>
+                      )}
 
-                      {/* Footer: GPS + Upvote / Downvote */}
-                      <div className='flex items-center justify-between pt-1 border-t border-[#edf0f0] text-xs'>
-                        <span className='text-[11px] text-[#66757c] flex items-center gap-1'>
-                          <MapPin className='w-3 h-3 text-[#126b70]' />
-                          <span>GPS Terkunci</span>
-                        </span>
-
+                      {/* Footer: Voting Pills */}
+                      <div className='flex items-center justify-end pt-1.5 border-t border-[#edf0f0] text-xs'>
                         <div className='flex items-center gap-2'>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onUpvote(report.id);
                             }}
-                            className={`px-2.5 py-1 rounded border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer ${
+                            className={`px-3 py-1 rounded border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer ${
                               voteState === 'upvote'
                                 ? 'bg-[#eaf3f1] border-[#126b70] text-[#126b70]'
-                                : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b]'
+                                : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b] hover:bg-[#f8faf9]'
                             }`}
                           >
                             <ThumbsUp className='w-3.5 h-3.5' />
@@ -262,10 +359,10 @@ export function FigmaCitizenFullPage({
                               e.stopPropagation();
                               onDownvote(report.id);
                             }}
-                            className={`px-2.5 py-1 rounded border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer ${
+                            className={`px-3 py-1 rounded border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer ${
                               voteState === 'downvote'
                                 ? 'bg-[#fbeeeb] border-[#b33e35] text-[#b33e35]'
-                                : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b]'
+                                : 'bg-white border-[#dce2e2] text-[#66757c] hover:text-[#172d3b] hover:bg-[#f8faf9]'
                             }`}
                           >
                             <span>Surut ({report.downvotes || 0})</span>
@@ -282,9 +379,9 @@ export function FigmaCitizenFullPage({
 
         {/* RIGHT COLUMN: Panduan Partisipasi (4 or 3.5 cols, Frame 3:11612 360x424) */}
         <div className='lg:col-span-4 space-y-4'>
-          <div className='bg-white border border-[#dce2e2] rounded-md p-5 sm:p-6 space-y-5 shadow-xs'>
+          <div className='bg-white border border-[#dce2e2] rounded-md p-5 sm:p-6 space-y-5 shadow-xs min-h-[424px] flex flex-col justify-between'>
             <h3 className='font-bold text-base text-[#172d3b]'>
-              Membaca laporan warga
+              Tips membaca laporan warga
             </h3>
 
             {/* Guideline 1 */}
@@ -324,6 +421,132 @@ export function FigmaCitizenFullPage({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 3. RANGKUMAN KONDISI TERKINI OLEH AI (Dipindahkan di bawah section laporan warga) */}
+      <div className='w-full bg-[#fbfdfd] border border-[#d2dedb] rounded-md p-4 sm:p-5 shadow-xs space-y-4'>
+        {/* Top Header with improved responsive layout */}
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#e5eeec]'>
+          <div className='flex items-start gap-2.5'>
+            <div className='w-8 h-8 rounded bg-[#126b70] text-white flex items-center justify-center shadow-2xs shrink-0 mt-0.5 sm:mt-0'>
+              <Sparkles className='w-4 h-4' />
+            </div>
+            <div className='space-y-0.5'>
+              <div className='flex items-center gap-2 flex-wrap'>
+                <h2 className='text-sm sm:text-base font-bold text-[#172d3b]'>
+                  Rangkuman Situasi Warga Terkini
+                </h2>
+                <span className='inline-flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-[#eaf3f1] text-[#126b70] border border-[#c3e6cb]'>
+                  Rangkuman Otomatis
+                </span>
+              </div>
+              <p className='text-xs text-[#66757c]'>
+                Sintesis real-time dari {reports.length} laporan lapangan warga
+              </p>
+            </div>
+          </div>
+
+          <div className='flex items-center justify-between sm:justify-end gap-2.5 shrink-0 w-full sm:w-auto pt-1 sm:pt-0'>
+            {currentSummary?.generatedAt && (
+              <span className='text-[11px] text-[#8a969a] shrink-0'>
+                {currentSummary.generatedAt}
+              </span>
+            )}
+            <button
+              type='button'
+              onClick={handleRegenerateSummary}
+              disabled={isLoadingSummary}
+              className='h-8 px-3 rounded bg-white hover:bg-[#f5f6f5] border border-[#dce2e2] text-xs font-semibold text-[#172d3b] flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs ml-auto sm:ml-0'
+              title='Perbarui rangkuman kondisi terkini dari laporan warga'
+            >
+              <RotateCw
+                className={`w-3.5 h-3.5 text-[#126b70] ${
+                  isLoadingSummary ? 'animate-spin' : ''
+                }`}
+              />
+              <span>
+                {isLoadingSummary ? 'Memperbarui...' : 'Perbarui Rangkuman'}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Content Body */}
+        {isLoadingSummary ? (
+          <div className='py-6 flex flex-col items-center justify-center space-y-2 text-center'>
+            <Sparkles className='w-6 h-6 text-[#126b70] animate-pulse' />
+            <p className='text-xs font-medium text-[#172d3b]'>
+              Sedang membaca dan merangkum laporan warga...
+            </p>
+            <p className='text-[11px] text-[#66757c]'>
+              Menganalisis titik terdampak, kedalaman air, dan peringatan
+              komuter
+            </p>
+          </div>
+        ) : currentSummary ? (
+          <div className='space-y-3.5'>
+            {/* Headline & Narrative Summary */}
+            <div className='space-y-1.5'>
+              <h3 className='text-sm sm:text-[15px] font-bold text-[#172d3b]'>
+                {currentSummary.headline}
+              </h3>
+              <p className='text-xs sm:text-sm text-[#3b525d] leading-relaxed'>
+                {currentSummary.summary}
+              </p>
+            </div>
+
+            {/* Key Hotspots / Reported Locations */}
+            {currentSummary.keyHotspots &&
+              currentSummary.keyHotspots.length > 0 && (
+                <div className='space-y-2 pt-1'>
+                  <span className='text-[11px] font-bold uppercase tracking-wider text-[#66757c] block'>
+                    Titik Pantau Lapangan:
+                  </span>
+                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5'>
+                    {currentSummary.keyHotspots.map((spot, idx) => (
+                      <div
+                        key={idx}
+                        className='bg-white border border-[#dce2e2] rounded p-2.5 space-y-1 text-xs shadow-2xs'
+                      >
+                        <div className='flex items-center justify-between gap-1.5'>
+                          <span className='font-bold text-[#172d3b] flex items-center gap-1 truncate'>
+                            <MapPin className='w-3 h-3 text-[#126b70] shrink-0' />
+                            {spot.district}
+                          </span>
+                          {spot.depthLevel && (
+                            <span className='text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#f5f6f5] border border-[#dce2e2] text-[#172d3b] shrink-0'>
+                              {spot.depthLevel}
+                            </span>
+                          )}
+                        </div>
+                        <p className='text-[11px] text-[#66757c] line-clamp-2 leading-relaxed'>
+                          {spot.condition}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            {/* Urgent Note / Commuter Recommendation */}
+            {currentSummary.urgentNote && (
+              <div className='p-2.5 rounded bg-[#eaf3f1] border border-[#c3e6cb] flex items-start gap-2 text-xs text-[#173744]'>
+                <AlertCircle className='w-4 h-4 text-[#126b70] shrink-0 mt-0.5' />
+                <div className='leading-relaxed'>
+                  <span className='font-semibold text-[#126b70]'>
+                    Catatan Akses &amp; Keselamatan:{' '}
+                  </span>
+                  <span>{currentSummary.urgentNote}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className='py-4 text-center text-xs text-[#66757c]'>
+            Belum ada rangkuman. Klik Perbarui Rangkuman untuk menganalisis
+            laporan.
+          </div>
+        )}
       </div>
 
       {/* 4. SAFETY ALERT CARD (Frame 3:11612 Catatan informasi 1360x78) */}

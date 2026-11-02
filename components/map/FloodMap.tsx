@@ -16,7 +16,9 @@ import {
   Crosshair,
   Video,
   ExternalLink,
+  Filter,
 } from 'lucide-react';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 interface FloodMapProps {
   stations: AWLRStation[];
@@ -179,40 +181,53 @@ export default function FloodMap({
   return (
     <div className="w-full h-full md:h-[560px] rounded-md overflow-hidden border border-[#dce2e2] shadow-xs relative bg-white flex flex-col">
       {/* Top Map Control Bar */}
-      <div className="bg-white px-4 sm:px-5 py-3 border-b border-[#dce2e2] z-10 flex flex-wrap items-center justify-between gap-2 shrink-0">
+      <div className="bg-white px-3 sm:px-5 py-2.5 sm:py-3 border-b border-[#dce2e2] relative z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shrink-0">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-[#126b70] shrink-0" />
-          <h2 className="text-[17px] font-bold text-[#173744]">
+          <h2 className="text-sm sm:text-[17px] font-bold text-[#173744]">
             Peta pemantauan
           </h2>
         </div>
 
-        {/* Filters & Layer Picker */}
-        <div className="flex items-center gap-2 text-xs">
-          <select
+        {/* Filters & Layer Picker: 2-column grid on mobile for a tight, neat layout */}
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+          <Dropdown
             value={layerType}
-            onChange={(e) => setLayerType(e.target.value as MapLayerType)}
-            className="bg-[#f8faf9] border border-[#dce2e2] text-[#173744] text-xs font-semibold px-2.5 py-1.5 rounded focus:outline-none cursor-pointer"
-          >
-            <option value="street">Peta Terang (OSM)</option>
-            <option value="topo">Topografi Kontur</option>
-            <option value="satellite">Citra Satelit</option>
-          </select>
+            onChange={(val) => setLayerType(val as MapLayerType)}
+            options={[
+              { value: 'street', label: 'Peta Terang (OSM)' },
+              { value: 'topo', label: 'Topografi Kontur' },
+              { value: 'satellite', label: 'Citra Satelit' },
+            ]}
+            size="sm"
+            variant="subtle"
+            fullWidth
+            className="w-full sm:w-auto"
+            triggerClassName="text-[11px] sm:text-xs py-1 px-2 h-7 sm:h-8"
+            icon={<Layers className="w-3 h-3 text-[#126b70]" />}
+          />
 
-          <select
+          <Dropdown
             value={filterMode}
-            onChange={(e) => setFilterMode(e.target.value as 'all' | 'critical' | 'reports')}
-            className="bg-[#f8faf9] border border-[#dce2e2] text-[#173744] text-xs font-semibold px-2.5 py-1.5 rounded focus:outline-none cursor-pointer"
-          >
-            <option value="all">Semua ({stations.length + reports.length})</option>
-            <option value="critical">Siaga & Awas</option>
-            <option value="reports">Laporan Warga ({reports.length})</option>
-          </select>
+            onChange={(val) => setFilterMode(val as 'all' | 'critical' | 'reports')}
+            options={[
+              { value: 'all', label: `Semua (${stations.length + reports.length})` },
+              { value: 'critical', label: 'Siaga & Awas' },
+              { value: 'reports', label: `Laporan Warga (${reports.length})` },
+            ]}
+            size="sm"
+            variant="subtle"
+            fullWidth
+            className="w-full sm:w-auto"
+            triggerClassName="text-[11px] sm:text-xs py-1 px-2 h-7 sm:h-8"
+            align="right"
+            icon={<Filter className="w-3 h-3 text-[#126b70]" />}
+          />
         </div>
       </div>
 
       {/* Interactive Map Box */}
-      <div className="w-full flex-1 min-h-[380px] relative bg-[#edf0e9]">
+      <div className="w-full flex-1 min-h-[380px] relative z-0 bg-[#edf0e9]">
         <MapContainer
           center={[-6.9850, 107.6250]}
           zoom={12}
@@ -370,7 +385,7 @@ export default function FloodMap({
         </div>
 
         {/* Top-Right Map Controls (+, -, Locate) */}
-        <div className="absolute top-3 right-3 z-[20] flex flex-col bg-white border border-[#dce2e2] rounded shadow-xs overflow-hidden">
+        <div className="absolute top-3.5 right-3 z-[5] flex flex-col bg-white border border-[#dce2e2] rounded shadow-xs overflow-hidden">
           <button
             onClick={() => setMapZoom((z) => Math.min(18, z + 1))}
             className="w-8 h-8 flex items-center justify-center text-[#173744] hover:bg-[#f8faf9] border-b border-[#dce2e2] font-bold text-sm cursor-pointer"

@@ -3,6 +3,7 @@
 import React from 'react';
 import { CalendarDays, RefreshCw, Info } from 'lucide-react';
 import { AWLRStation } from '@/types';
+import { CountingNumber } from '@/components/ui/CountingNumber';
 
 interface FigmaSummaryBarProps {
   stations: AWLRStation[];
@@ -72,7 +73,7 @@ export function FigmaSummaryBar({
               Status lokasi pantau
             </div>
             <div className='text-[11px] text-[#66757c] mt-0.5'>
-              Berdasarkan {stations.length} stasiun sungai aktif
+              Berdasarkan <CountingNumber value={stations.length} isLoading={isRefreshing} /> stasiun sungai aktif
             </div>
           </div>
 
@@ -80,7 +81,7 @@ export function FigmaSummaryBar({
           <div className='px-6 border-r border-[#dce2e2] flex items-center gap-3'>
             <span className='w-2 h-2 rounded-full bg-[#b33e35]' />
             <span className='font-mono text-2xl font-bold text-[#173744]'>
-              {awasCount}
+              <CountingNumber value={awasCount} isLoading={isRefreshing} />
             </span>
             <span className='text-[14px] text-[#173744]'>Awas</span>
           </div>
@@ -89,7 +90,7 @@ export function FigmaSummaryBar({
           <div className='px-6 border-r border-[#dce2e2] flex items-center gap-3'>
             <span className='w-2 h-2 rounded-full bg-[#a9621d]' />
             <span className='font-mono text-2xl font-bold text-[#173744]'>
-              {siagaCount}
+              <CountingNumber value={siagaCount} isLoading={isRefreshing} />
             </span>
             <span className='text-[14px] text-[#173744]'>Siaga</span>
           </div>
@@ -98,7 +99,7 @@ export function FigmaSummaryBar({
           <div className='px-6 border-r border-[#dce2e2] flex items-center gap-3'>
             <span className='w-2 h-2 rounded-full bg-[#927626]' />
             <span className='font-mono text-2xl font-bold text-[#173744]'>
-              {waspadaCount}
+              <CountingNumber value={waspadaCount} isLoading={isRefreshing} />
             </span>
             <span className='text-[14px] text-[#173744]'>Waspada</span>
           </div>
@@ -107,7 +108,7 @@ export function FigmaSummaryBar({
           <div className='px-6 border-r border-[#dce2e2] flex items-center gap-3'>
             <span className='w-2 h-2 rounded-full bg-[#497665]' />
             <span className='font-mono text-2xl font-bold text-[#173744]'>
-              {normalCount}
+              <CountingNumber value={normalCount} isLoading={isRefreshing} />
             </span>
             <span className='text-[14px] text-[#173744]'>Normal</span>
           </div>
@@ -160,7 +161,7 @@ export function FigmaSummaryBar({
         <div className='space-y-1.5'>
           <div className='flex items-center justify-between'>
             <span className='text-[10px] font-bold tracking-wider text-[#66757c] uppercase'>
-              STATUS DARI {stations.length} LOKASI PANTAU
+              STATUS DARI <CountingNumber value={stations.length} isLoading={isRefreshing} /> LOKASI PANTAU
             </span>
             <button
               onClick={onRefresh}
@@ -178,7 +179,7 @@ export function FigmaSummaryBar({
             {/* Awas */}
             <div className='flex flex-col items-center justify-center p-1'>
               <span className='font-mono text-xl font-bold text-[#b33e35]'>
-                {awasCount}
+                <CountingNumber value={awasCount} isLoading={isRefreshing} />
               </span>
               <span className='text-[11px] text-[#66757c] mt-0.5'>Awas</span>
             </div>
@@ -186,7 +187,7 @@ export function FigmaSummaryBar({
             {/* Siaga */}
             <div className='flex flex-col items-center justify-center p-1'>
               <span className='font-mono text-xl font-bold text-[#a9621d]'>
-                {siagaCount}
+                <CountingNumber value={siagaCount} isLoading={isRefreshing} />
               </span>
               <span className='text-[11px] text-[#66757c] mt-0.5'>Siaga</span>
             </div>
@@ -194,7 +195,7 @@ export function FigmaSummaryBar({
             {/* Waspada */}
             <div className='flex flex-col items-center justify-center p-1'>
               <span className='font-mono text-xl font-bold text-[#927626]'>
-                {waspadaCount}
+                <CountingNumber value={waspadaCount} isLoading={isRefreshing} />
               </span>
               <span className='text-[11px] text-[#66757c] mt-0.5'>Waspada</span>
             </div>
@@ -202,7 +203,7 @@ export function FigmaSummaryBar({
             {/* Normal */}
             <div className='flex flex-col items-center justify-center p-1'>
               <span className='font-mono text-xl font-bold text-[#497665]'>
-                {normalCount}
+                <CountingNumber value={normalCount} isLoading={isRefreshing} />
               </span>
               <span className='text-[11px] text-[#66757c] mt-0.5'>Normal</span>
             </div>
