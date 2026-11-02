@@ -293,6 +293,17 @@ export default function FloodMap({
                           Ambang Siaga: {st.warningThresholdCm} cm
                         </div>
                       </div>
+                      <div className="mt-1.5 pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px]">
+                        <span className="text-[#66757c]">Sumber: BBWS Citarum</span>
+                        <a
+                          href="https://sda.pu.go.id/balai/bbwscitarum/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-[#126b70] hover:underline"
+                        >
+                          Portal Resmi ↗
+                        </a>
+                      </div>
                     </div>
                   </Popup>
                 </CircleMarker>

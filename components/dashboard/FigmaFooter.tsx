@@ -13,7 +13,25 @@ export function FigmaFooter() {
             Citarum Alert • Kab. Bandung
           </div>
           <div className="text-xs text-[#66757c] mt-0.5">
-            Integrasi data hidrologi BBWS Citarum, BPBD Kab. Bandung dan partisipasi warga.
+            Integrasi data hidrologi resmi{' '}
+            <a
+              href="https://sda.pu.go.id/balai/bbwscitarum/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#126b70] hover:underline font-semibold"
+            >
+              BBWS Citarum (Kementerian PU) ↗
+            </a>
+            ,{' '}
+            <a
+              href="https://bpbd.bandungkab.go.id"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#126b70] hover:underline font-semibold"
+            >
+              BPBD Kab. Bandung ↗
+            </a>{' '}
+            dan partisipasi warga.
           </div>
         </div>
 
@@ -29,7 +47,25 @@ export function FigmaFooter() {
           Citarum Alert • Kabupaten Bandung
         </div>
         <p className="leading-relaxed">
-          Rujukan sensor pada website: BBWS Citarum / BPBD. Partisipasi warga terpisah dari data sensor.
+          Rujukan sensor pada website:{' '}
+          <a
+            href="https://sda.pu.go.id/balai/bbwscitarum/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#126b70] hover:underline font-semibold"
+          >
+            BBWS Citarum ↗
+          </a>{' '}
+          /{' '}
+          <a
+            href="https://bpbd.bandungkab.go.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#126b70] hover:underline font-semibold"
+          >
+            BPBD ↗
+          </a>
+          . Partisipasi warga terpisah dari data sensor.
         </p>
         <p className="leading-relaxed">
           Informasi pendukung, bukan panduan rute atau evakuasi. Utamakan kondisi lapangan dan arahan petugas.

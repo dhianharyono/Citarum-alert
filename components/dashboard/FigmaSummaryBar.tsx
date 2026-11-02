@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CalendarDays, RefreshCw, Info } from 'lucide-react';
+import { CalendarDays, RefreshCw, Info, ExternalLink } from 'lucide-react';
 import { AWLRStation } from '@/types';
 import { CountingNumber } from '@/components/ui/CountingNumber';
 
@@ -62,9 +62,16 @@ export function FigmaSummaryBar({
               <CalendarDays className='w-3.5 h-3.5 text-[#126b70]' />
               <span>Pratinjau data • {displayDate}</span>
             </div>
-            <span className='text-[11px] text-[#66757c] mt-0.5'>
-              Terkoneksi ke pos AWLR &amp; sensor lapangan
-            </span>
+            <a
+              href="https://sda.pu.go.id/balai/bbwscitarum/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className='text-[11px] text-[#126b70] hover:text-[#0e5458] hover:underline inline-flex items-center gap-1 mt-0.5'
+              title='Buka portal resmi BBWS Citarum (Kementerian PU)'
+            >
+              <span>Sumber: BBWS Citarum &amp; BPBD</span>
+              <ExternalLink className='w-2.5 h-2.5' />
+            </a>
           </div>
         </div>
 
@@ -162,6 +169,17 @@ export function FigmaSummaryBar({
             <div className='text-[11px] text-[#66757c] mt-0.5 leading-snug'>
               Terhubung ke sensor AWLR &amp; validasi lapangan warga
               se-Kabupaten Bandung.
+            </div>
+            <div className='mt-1.5 pt-1.5 border-t border-[#c3e6cb]/60'>
+              <a
+                href='https://sda.pu.go.id/balai/bbwscitarum/'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-[10px] font-semibold text-[#126b70] hover:underline inline-flex items-center gap-1'
+              >
+                <span>Lihat portal resmi BBWS Citarum</span>
+                <ExternalLink className='w-2.5 h-2.5' />
+              </a>
             </div>
           </div>
         </div>

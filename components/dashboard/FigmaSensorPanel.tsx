@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Info, Radio } from 'lucide-react';
+import { Info, Radio, ExternalLink, ShieldCheck } from 'lucide-react';
 import { AWLRStation } from '@/types';
 import { CountingNumber } from '@/components/ui/CountingNumber';
 
@@ -40,9 +40,19 @@ export function FigmaSensorPanel({
             <CountingNumber value={stations.length} isLoading={isLoading} /> lokasi
           </span>
         </div>
-        <p className="text-xs text-[#66757c] mt-0.5">
-          AWLR BBWS / BPBD • interval 5 menit
-        </p>
+        <div className="flex items-center justify-between mt-1 text-xs text-[#66757c] gap-2 flex-wrap">
+          <span>AWLR BBWS / BPBD • interval 5 menit</span>
+          <a
+            href="https://sda.pu.go.id/balai/bbwscitarum/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#126b70] hover:text-[#0e5458] hover:underline transition"
+            title="Buka Portal Resmi BBWS Citarum (Kementerian PU)"
+          >
+            <span>Sumber Resmi</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
       </div>
 
       {/* Column Sub-label Bar */}
@@ -116,12 +126,37 @@ export function FigmaSensorPanel({
         )}
       </div>
 
-      {/* Disclaimer / Note Footer */}
-      <div className="p-3.5 sm:px-5 bg-[#f8faf9] border-t border-[#dce2e2] flex items-start gap-2 text-[11px] text-[#66757c] shrink-0">
-        <Info className="w-3.5 h-3.5 text-[#126b70] shrink-0 mt-0.5" />
-        <span className="leading-snug">
-          Waktu tiap pembacaan otomatis terbarui tiap 5 menit dari jaringan sensor duga air resmi.
-        </span>
+      {/* Disclaimer & Official Verification Footer */}
+      <div className="p-3.5 sm:px-5 bg-[#f8faf9] border-t border-[#dce2e2] space-y-1.5 text-[11px] text-[#66757c] shrink-0">
+        <div className="flex items-start gap-2">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#126b70] shrink-0 mt-0.5" />
+          <span className="leading-snug">
+            Rujukan data sensor: Telemetri <strong>BBWS Citarum (Kementerian PU)</strong> &amp; <strong>BPBD</strong>.
+          </span>
+        </div>
+        <div className="flex items-center gap-2.5 pt-0.5 pl-5.5 flex-wrap text-[10px] sm:text-[11px]">
+          <a
+            href="https://sda.pu.go.id/balai/bbwscitarum/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-semibold text-[#126b70] hover:underline"
+            title="Portal Utama Balai Besar Wilayah Sungai Citarum"
+          >
+            <span>Portal BBWS Citarum</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
+          <span className="text-[#dce2e2]">•</span>
+          <a
+            href="https://ffws-bbwscitarum.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-semibold text-[#126b70] hover:underline"
+            title="Flood Forecasting and Warning System BBWS Citarum"
+          >
+            <span>FFWS Telemetri Banjir</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
+        </div>
       </div>
     </div>
   );

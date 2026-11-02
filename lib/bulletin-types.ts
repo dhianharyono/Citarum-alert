@@ -25,8 +25,8 @@ export const DEFAULT_BULLETIN: SituationalBulletinData = {
       region: 'Bandung Selatan (Bantaran Citarum)',
       location: 'Dayeuhkolot, Baleendah & Bojongsoang',
       condition:
-        'Tinggi Muka Air (TMA) Sungai Citarum di Stasiun Dayeuhkolot berada pada level siaga (685 cm). Akses Jembatan Lama Dayeuhkolot dan ruas Jl. Raya Andir-Baleendah tergenang 20-50 cm saat hujan deras, kendaraan dialihkan melalui Jembatan Baru Dayeuhkolot.',
-      status: 'Siaga Genangan',
+        'Tinggi Muka Air (TMA) Sungai Citarum di Stasiun Dayeuhkolot terpantau pada level normal (388 cm / 3.88 m). Akses Jembatan Dayeuhkolot dan ruas Jl. Raya Andir-Baleendah saat ini terpantau lancar dan terkendali.',
+      status: 'Bisa Dilewati',
     },
     {
       region: 'Koridor Arteri Barat',
